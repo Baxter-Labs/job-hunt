@@ -1,0 +1,9 @@
+{
+  "name": "job-hunt",
+  "version": "0.1.0",
+  "description": "Find jobs, tailor CVs/cover letters (with a fabrication check + humanizer), and apply (assisted). You pick the platforms and your visa/work-auth setting; the same engine runs search -> tailor -> apply.",
+  "author": {
+    "name": "baxter-labs"
+  },
+  "keywords": ["job-search", "cv", "resume", "cover-letter", "ats", "apply", "career"]
+}

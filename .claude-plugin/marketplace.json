@@ -1,0 +1,13 @@
+{
+  "name": "job-hunt",
+  "owner": {
+    "name": "baxter-labs"
+  },
+  "plugins": [
+    {
+      "name": "job-hunt",
+      "source": "./plugins/job-hunt",
+      "description": "Find jobs, generate fabrication-checked tailored CVs + cover letters from your own past CVs and a job description, and apply (assisted). Region-agnostic: you pick platforms and your work-authorisation requirement."
+    }
+  ]
+}
