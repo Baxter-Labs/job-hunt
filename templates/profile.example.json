@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "contact": {
+    "name": "Ada Lovelace",
+    "email": "ada@example.com",
+    "phone": "+00 000 000 000",
+    "location": "Amsterdam, Netherlands",
+    "links": [{ "label": "LinkedIn", "url": "https://linkedin.com/in/example" }]
+  },
+  "target_locations": ["Netherlands", "EU remote"],
+  "platforms": ["indeed", "career_pages"],
+  "work_auth": { "needs_sponsorship": true, "scheme": "nl-ind-hsm" },
+  "language_constraints": { "english_only": true },
+  "apply_prefs": { "auto_submit_simple_forms": false }
+}

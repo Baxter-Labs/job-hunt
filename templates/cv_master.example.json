@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "contact": {
+    "name": "Ada Lovelace",
+    "title": "Machine Learning Engineer",
+    "email": "ada@example.com",
+    "phone": "+00 000 000 000",
+    "location": "Amsterdam, Netherlands",
+    "links": [{ "label": "GitHub", "url": "https://github.com/example" }],
+    "work_authorization": "EU work permit required (HSM sponsor)"
+  },
+  "summary": "ML engineer with experience building and shipping models.",
+  "skills": [
+    { "name": "Python", "category": "Programming", "level": null },
+    { "name": "Machine Learning", "category": "AI/ML", "level": null }
+  ],
+  "experience": [
+    {
+      "company": "Analytical Engines Ltd",
+      "title": "Machine Learning Engineer",
+      "location": "London, UK",
+      "dates": "Jan 2020 – Dec 2022",
+      "bullets": ["Built and deployed predictive models used across the business."]
+    }
+  ],
+  "education": [],
+  "projects": [{ "name": "Example Project", "details": "A sample project entry." }],
+  "certifications": [],
+  "languages": ["English"]
+}
