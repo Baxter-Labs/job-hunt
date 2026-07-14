@@ -13,7 +13,7 @@ never edit files in the workspace by hand.
 
 - Scripts dir: `${CLAUDE_PLUGIN_ROOT}/scripts`
 - Run the CLI as: `python -m engine.setup_cli <subcommand>` from that scripts dir,
-  using the user's Python (a venv with `pypdf` installed — see the repo README).
+  using a Python that has `pypdf` installed (see the README "Setup (one-time)" section; the dependency is listed in `${CLAUDE_PLUGIN_ROOT}/scripts/requirements.txt`).
 - The workspace lives at `$JOB_HUNT_HOME` (default `~/.job-hunt`). Do not hardcode paths.
 
 ## Steps
@@ -68,3 +68,4 @@ never edit files in the workspace by hand.
 - Never fabricate CV content. Only transcribe what is in the user's CV text.
 - Never store or ask for passwords.
 - Always use the CLI for writes so validation runs; never hand-edit workspace files.
+- If the CLI returns `{"ok": false, "error": ...}` mentioning a missing module (e.g. `pypdf`), tell the user to install dependencies per the README "Setup (one-time)" section, then retry — do not proceed.

@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 
 from engine import cv_import, profile as profile_mod, workspace
@@ -85,7 +84,7 @@ def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
     try:
         return args.func(args)
-    except (ValueError, FileNotFoundError, json.JSONDecodeError) as exc:
+    except (ValueError, FileNotFoundError, ImportError) as exc:
         _emit({"ok": False, "error": str(exc)})
         return 1
 

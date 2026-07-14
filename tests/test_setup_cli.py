@@ -1,6 +1,5 @@
 import json
 import subprocess
-import sys
 from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "plugins" / "job-hunt" / "scripts"
@@ -65,3 +64,33 @@ def test_show_reports_state(tmp_path):
     out = json.loads(proc.stdout)
     assert out["has_profile"] is False
     assert out["has_master"] is False
+
+
+def test_write_master_valid(tmp_path):
+    home = tmp_path / "ws"
+    _run(["init-workspace"], home)
+    master = {
+        "schema_version": "1.0",
+        "contact": {"name": "Ada Lovelace", "title": "ML Engineer",
+                     "email": "ada@example.com", "phone": None, "location": None,
+                     "links": [], "work_authorization": None},
+        "summary": "Engineer.",
+        "skills": [{"name": "Python", "category": "Programming", "level": None}],
+        "experience": [{"company": "Analytical Engines", "title": "ML Engineer",
+                         "location": "London", "dates": "Jan 2020 – Dec 2022",
+                         "bullets": ["Built models."]}],
+        "education": [], "projects": [], "certifications": [], "languages": ["English"],
+    }
+    proc = _run(["write-master", "--json", json.dumps(master)], home)
+    assert proc.returncode == 0, proc.stderr
+    assert json.loads(proc.stdout)["ok"] is True
+    assert (home / "cv_master.json").exists()
+
+
+def test_extract_cv_missing_file_returns_clean_json(tmp_path):
+    home = tmp_path / "ws"
+    _run(["init-workspace"], home)
+    proc = _run(["extract-cv", "--pdf", str(tmp_path / "nope.pdf")], home)
+    assert proc.returncode == 1
+    out = json.loads(proc.stdout)  # must be clean JSON, not a traceback
+    assert out["ok"] is False and "error" in out

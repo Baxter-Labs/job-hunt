@@ -11,6 +11,25 @@ pick the platforms and your work-authorisation requirement as settings.
 /plugin install job-hunt
 ```
 
+## Setup (one-time)
+
+The plugin's engine needs one Python dependency, `pypdf`. Install it into the Python
+you'll use (from the installed plugin directory, i.e. `${CLAUDE_PLUGIN_ROOT}`):
+
+```bash
+pip install -r plugins/job-hunt/scripts/requirements.txt
+```
+
+Prefer an isolated environment? Create a venv and install there, then make sure
+`/job-setup` uses that interpreter:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r plugins/job-hunt/scripts/requirements.txt
+```
+
+`/job-setup` will tell you if a dependency is missing.
+
 ## Commands
 
 - `/job-setup` — one-time setup: creates your workspace, profile, and master CV.

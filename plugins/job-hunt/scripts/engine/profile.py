@@ -22,6 +22,8 @@ PLATFORMS: set[str] = {
 
 SCHEMES: set[str] = {"nl-ind-hsm", "eu-blue-card", "none"}
 
+SCHEMA_VERSION: str = "1.0"
+
 
 def default_profile() -> dict[str, Any]:
     """Return an empty-but-valid-shaped profile with safe defaults."""
@@ -48,6 +50,15 @@ def validate_profile(p: dict[str, Any]) -> list[str]:
 
     if not isinstance(p, dict):
         return ["root: expected a JSON object"]
+
+    if p.get("schema_version") != SCHEMA_VERSION:
+        issues.append(
+            f"schema_version: expected {SCHEMA_VERSION!r}, got {p.get('schema_version')!r}"
+        )
+
+    tl = p.get("target_locations")
+    if tl is not None and not (isinstance(tl, list) and all(isinstance(x, str) for x in tl)):
+        issues.append("target_locations: must be a list of strings")
 
     contact = p.get("contact")
     if not isinstance(contact, dict):

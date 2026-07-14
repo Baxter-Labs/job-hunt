@@ -57,6 +57,18 @@ def test_validate_requires_at_least_one_platform():
     assert any("platform" in i for i in issues)
 
 
+def test_validate_rejects_wrong_schema_version():
+    p = _valid_profile()
+    p["schema_version"] = "2.0"
+    assert any("schema_version" in i for i in prof.validate_profile(p))
+
+
+def test_validate_rejects_non_list_target_locations():
+    p = _valid_profile()
+    p["target_locations"] = "Netherlands"
+    assert any("target_locations" in i for i in prof.validate_profile(p))
+
+
 def test_save_and_load_roundtrip(tmp_path):
     path = tmp_path / "profile.json"
     p = _valid_profile()
