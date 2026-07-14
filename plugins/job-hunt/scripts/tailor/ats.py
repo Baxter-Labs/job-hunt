@@ -17,7 +17,7 @@ import json
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # A curated, cross-domain lexicon of skills / tools / methods. Multi-word entries
 # are matched as phrases. Intentionally broad (software, data, cloud, product,
@@ -76,9 +76,11 @@ def _contains(term: str, normalized: str) -> bool:
 
     Uses custom boundaries (not \\b) so symbol-bearing tokens like 'c++',
     'ci/cd', 'node.js', 'a/b testing' match correctly, while a single letter
-    like 'r' does not match inside 'react' or 'docker'.
+    like 'r' does not match inside 'react' or 'docker'. Plain alphabetic terms
+    of length >= 3 also match a trailing plural 's' ('api' -> 'apis').
     """
-    pattern = rf"(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])"
+    suffix = "s?" if (term.isalpha() and len(term) >= 3) else ""
+    pattern = rf"(?<![a-z0-9]){re.escape(term)}{suffix}(?![a-z0-9])"
     return re.search(pattern, normalized) is not None
 
 
@@ -89,8 +91,8 @@ def _salient_terms(jd_text: str, exclude: set[str], limit: int) -> list[str]:
     counts: Counter = Counter()
     salience: dict[str, int] = {}
     for w in _WORD_RE.findall(jd_text or ""):
-        lw = w.lower()
-        if lw in _STOPWORDS or lw in exclude or len(lw) < 3:
+        lw = w.lower().strip("./#-")
+        if len(lw) < 3 or lw in _STOPWORDS or lw in exclude:
             continue
         counts[lw] += 1
         boost = 2 if (w.isupper() and 2 <= len(w) <= 5) else (1 if w[:1].isupper() else 0)
@@ -109,6 +111,11 @@ def extract_keywords(jd_text: str, max_keywords: int = 40) -> list[str]:
         if term not in seen and _contains(term, normalized):
             keywords.append(term)
             seen.add(term)
+            # Suppress this phrase's component words from salient mining so a
+            # matched "a/b testing" doesn't also yield stray "testing"/"a/b".
+            for part in re.split(r"[ /.+#-]+", term):
+                if len(part) >= 3:
+                    seen.add(part)
     for term in _salient_terms(jd_text, exclude=seen, limit=max_keywords):
         if term not in seen:
             keywords.append(term)

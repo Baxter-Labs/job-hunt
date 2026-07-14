@@ -86,3 +86,33 @@ def test_write_ats_report(tmp_path):
     path = ats.write_ats_report(report, tmp_path)
     assert path.name == "ats_report.json"
     assert json.loads(path.read_text())["company"] == "Acme"
+
+
+def test_extract_keywords_strips_trailing_punctuation():
+    jd = "Strong Python skills. Experience with Kubernetes."
+    kws = ats.extract_keywords(jd)
+    assert "kubernetes" in kws
+    assert "kubernetes." not in kws
+    assert "python" in kws
+    assert "python." not in kws
+
+
+def test_api_keyword_matches_plural_apis():
+    matched, missing = ats.match_keywords("Built REST APIs for the platform.", ["api"])
+    assert matched == ["api"]
+    assert missing == []
+
+
+def test_singular_boundary_still_strict_for_short_terms():
+    # plural allowance must NOT loosen single-letter terms
+    matched, missing = ats.match_keywords("We use React and Go daily.", ["r"])
+    assert matched == [] and missing == ["r"]
+
+
+def test_extract_keywords_does_not_remine_multiword_components():
+    jd = "Run A/B testing and content marketing daily. A/B testing is core."
+    kws = ats.extract_keywords(jd)
+    assert "a/b testing" in kws
+    assert "content marketing" in kws
+    assert "testing" not in kws
+    assert "marketing" not in kws
