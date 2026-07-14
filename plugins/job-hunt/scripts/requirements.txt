@@ -1,1 +1,5 @@
 pypdf>=4.0
+# Optional: high-fidelity PDF rendering for /job-tailor. If unavailable the
+# renderer falls back to reportlab, then a dependency-free stdlib PDF writer,
+# so a missing weasyprint degrades PDF quality but never breaks the pipeline.
+weasyprint>=60
