@@ -63,3 +63,47 @@ def test_defaults_to_workspace_path(monkeypatch, tmp_path):
     monkeypatch.setenv("JOB_HUNT_HOME", str(home))
     T.upsert(company="A", role="R", path=None)  # None -> workspace tracker
     assert (home / "tracker.csv").exists()
+
+
+def test_statuses_vocabulary_is_ordered_and_documented():
+    assert T.STATUSES == (
+        "not_applied", "pack_generated", "applied",
+        "response", "interview", "offer", "rejected", "ghosted",
+    )
+    assert T.is_valid_status("offer") is True
+    assert T.is_valid_status("bogus") is False
+
+
+def test_applied_or_beyond_classification():
+    for s in ("applied", "response", "interview", "offer", "rejected", "ghosted"):
+        assert T.applied_or_beyond(s) is True, s
+    for s in ("not_applied", "pack_generated", "discovered", ""):
+        assert T.applied_or_beyond(s) is False, s
+
+
+def test_log_outcome_validates_status(tmp_path):
+    p = _path(tmp_path)
+    res = T.log_outcome(company="Acme", role="Backend Engineer",
+                        status="interview", path=p)
+    assert res["action"] == "added"
+    rows = T.load_tracker(p)
+    assert rows[0]["status"] == "interview"
+    # An interview implies the application happened -> date_applied stamped.
+    assert rows[0]["date_applied"]
+
+
+def test_log_outcome_rejects_unknown_status(tmp_path):
+    p = _path(tmp_path)
+    try:
+        T.log_outcome(company="Acme", role="R", status="hired", path=p)
+        assert False, "expected ValueError"
+    except ValueError as e:
+        assert "hired" in str(e)
+    assert T.load_tracker(p) == []  # nothing written
+
+
+def test_upsert_stamps_date_applied_for_terminal_negative(tmp_path):
+    p = _path(tmp_path)
+    T.upsert(company="Acme", role="R", status="rejected", path=p)
+    rows = T.load_tracker(p)
+    assert rows[0]["date_applied"]  # rejected implies they applied

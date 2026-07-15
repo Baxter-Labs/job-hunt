@@ -34,6 +34,38 @@ FIELDNAMES = [
 ]
 
 
+# Ordered, documented outcome vocabulary (Phase B). Backward compatible: the
+# legacy statuses "discovered" and "applied" still round-trip through upsert;
+# these are the canonical set the outcome-logging path validates against.
+STATUSES: tuple[str, ...] = (
+    "not_applied",
+    "pack_generated",
+    "applied",
+    "response",
+    "interview",
+    "offer",
+    "rejected",
+    "ghosted",
+)
+
+# Statuses that imply an application actually exists (the funnel "applied"
+# denominator). rejected/ghosted are terminal negatives but still count as
+# applied — you cannot be rejected/ghosted without having applied.
+_APPLIED_OR_BEYOND: frozenset[str] = frozenset(
+    {"applied", "response", "interview", "offer", "rejected", "ghosted"}
+)
+
+
+def is_valid_status(status: str) -> bool:
+    """True when status is one of the documented STATUSES."""
+    return status in STATUSES
+
+
+def applied_or_beyond(status: str) -> bool:
+    """True when the status implies an application exists (funnel 'applied')."""
+    return (status or "").strip().lower() in _APPLIED_OR_BEYOND
+
+
 def load_tracker(path: Optional[Path] = None) -> list[dict]:
     tracker = _resolve(path)
     if not tracker.exists():
@@ -91,7 +123,7 @@ def upsert(
             if same or same_id:
                 if status:
                     row["status"] = status
-                    if status == "applied" and not row.get("date_applied"):
+                    if applied_or_beyond(status) and not row.get("date_applied"):
                         row["date_applied"] = today
                 if url:
                     row["url"] = url
@@ -109,7 +141,7 @@ def upsert(
 
     rows.append({
         "discovered_date": today,
-        "date_applied": today if status == "applied" else "",
+        "date_applied": today if applied_or_beyond(status) else "",
         "company": company,
         "role": role,
         "url": url,
@@ -121,6 +153,34 @@ def upsert(
     })
     save_tracker(rows, path)
     return {"action": "added", "company": company, "role": role}
+
+
+def log_outcome(
+    *,
+    company: str,
+    role: str,
+    status: str,
+    url: str = "",
+    work_auth_status: str = "",
+    job_id: str = "",
+    source: str = "",
+    notes: str = "",
+    path: Optional[Path] = None,
+) -> dict:
+    """Validate an outcome status against STATUSES, then upsert the row.
+
+    Raises ValueError (caught by the CLI -> JSON {"ok": false} + exit 1) when the
+    status is not one of the documented STATUSES. This is the outcome-logging
+    path; it never fabricates a row on an invalid status."""
+    if not is_valid_status(status):
+        raise ValueError(
+            f"unknown status {status!r}; expected one of: {', '.join(STATUSES)}"
+        )
+    return upsert(
+        company=company, role=role, url=url, status=status,
+        work_auth_status=work_auth_status, job_id=job_id, source=source,
+        notes=notes, path=path,
+    )
 
 
 def summarize(rows: list[dict]) -> dict:

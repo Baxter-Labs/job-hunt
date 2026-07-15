@@ -147,3 +147,23 @@ def test_refresh_register_rejects_non_register_scheme(tmp_path):
     proc = _run(["refresh-register", "--scheme", "none"], home)
     assert proc.returncode == 1
     assert json.loads(proc.stdout)["ok"] is False
+
+
+def test_log_outcome_valid_status_upserts(tmp_path):
+    home = tmp_path / "ws"; home.mkdir()
+    proc = _run(["log-outcome", "--company", "Acme", "--role", "AI Engineer",
+                 "--status", "interview", "--source", "indeed"], home)
+    assert proc.returncode == 0, proc.stderr
+    out = json.loads(proc.stdout)
+    assert out["action"] == "added"
+    status_proc = _run(["status"], home)
+    summary = json.loads(status_proc.stdout)["tracker"]
+    assert summary["by_status"]["interview"] == 1
+
+
+def test_log_outcome_rejects_unknown_status(tmp_path):
+    home = tmp_path / "ws"; home.mkdir()
+    proc = _run(["log-outcome", "--company", "Acme", "--role", "R",
+                 "--status", "hired"], home)
+    assert proc.returncode == 1
+    assert json.loads(proc.stdout)["ok"] is False

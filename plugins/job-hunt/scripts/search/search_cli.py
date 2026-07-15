@@ -114,6 +114,17 @@ def cmd_track(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_log_outcome(args: argparse.Namespace) -> int:
+    workspace.ensure_workspace()
+    result = tracker_mod.log_outcome(
+        company=args.company, role=args.role, status=args.status,
+        url=args.url, work_auth_status=args.work_auth,
+        job_id=args.job_id, source=args.source, notes=args.notes,
+    )
+    _emit(result)
+    return 0
+
+
 def cmd_status(_args: argparse.Namespace) -> int:
     rows = tracker_mod.load_tracker()
     _emit({"home": str(workspace.get_home()), "tracker": tracker_mod.summarize(rows)})
@@ -158,6 +169,19 @@ def build_parser() -> argparse.ArgumentParser:
     tr.add_argument("--source", default="")
     tr.add_argument("--notes", default="")
     tr.set_defaults(func=cmd_track)
+
+    lo = sub.add_parser("log-outcome", help="Record an application outcome status.")
+    lo.add_argument("--company", required=True)
+    lo.add_argument("--role", required=True)
+    lo.add_argument("--status", required=True,
+                    help="One of: not_applied, pack_generated, applied, response, "
+                         "interview, offer, rejected, ghosted.")
+    lo.add_argument("--url", default="")
+    lo.add_argument("--work-auth", default="")
+    lo.add_argument("--job-id", default="")
+    lo.add_argument("--source", default="")
+    lo.add_argument("--notes", default="")
+    lo.set_defaults(func=cmd_log_outcome)
 
     sub.add_parser("status").set_defaults(func=cmd_status)
 
