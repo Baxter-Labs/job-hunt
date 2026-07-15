@@ -147,3 +147,41 @@ def test_ats_tailored_cv_source_excludes_unrendered_keyword():
     }
     res = ats_eval.evaluate_ats_case(case)
     assert res["passed"], res["failures"]
+
+
+import rank_eval  # noqa: E402
+
+
+def test_evaluate_rank_case_passes_on_expected_order():
+    case = {
+        "id": "inline-rank", "synthetic": True, "today": "2026-07-15",
+        "listings": [
+            {"id": "low", "company": "Zeta BV", "role": "Engineer",
+             "posted_date": "", "work_auth": {"status": "not_found"}},
+            {"id": "high", "company": "Alpha BV", "role": "Engineer",
+             "posted_date": "2026-07-14", "work_auth": {"status": "confirmed"}},
+        ],
+        "expect": {"order": ["high", "low"]},
+        "_source": "inline-rank.json",
+    }
+    res = rank_eval.evaluate_rank_case(case)
+    assert res["passed"], res["failures"]
+    assert res["kind"] == "rank"
+    assert res["order"] == ["high", "low"]
+
+
+def test_evaluate_rank_case_flags_wrong_order():
+    case = {
+        "id": "wrong-rank", "synthetic": True, "today": "2026-07-15",
+        "listings": [
+            {"id": "a", "company": "Alpha BV", "role": "Engineer",
+             "posted_date": "2026-07-14", "work_auth": {"status": "confirmed"}},
+            {"id": "b", "company": "Beta BV", "role": "Engineer",
+             "posted_date": "", "work_auth": {"status": "not_found"}},
+        ],
+        "expect": {"order": ["b", "a"]},   # deliberately wrong
+        "_source": "wrong-rank.json",
+    }
+    res = rank_eval.evaluate_rank_case(case)
+    assert res["passed"] is False
+    assert res["failures"]

@@ -1,0 +1,14 @@
+{
+  "id": "name-tiebreak",
+  "synthetic": true,
+  "today": "2026-07-15",
+  "listings": [
+    {"id": "zeta", "company": "Zeta BV", "role": "Engineer",
+     "posted_date": "", "work_auth": {"status": "n/a"}},
+    {"id": "alpha", "company": "Alpha BV", "role": "Engineer",
+     "posted_date": "", "work_auth": {"status": "n/a"}},
+    {"id": "mid", "company": "Mid BV", "role": "Engineer",
+     "posted_date": "", "work_auth": {"status": "n/a"}}
+  ],
+  "expect": {"order": ["alpha", "mid", "zeta"]}
+}

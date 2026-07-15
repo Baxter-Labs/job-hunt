@@ -1,0 +1,14 @@
+{
+  "id": "sponsorship-dominates",
+  "synthetic": true,
+  "today": "2026-07-15",
+  "listings": [
+    {"id": "c-confirmed", "company": "Meridian BV", "role": "Engineer",
+     "posted_date": "2026-01-01", "work_auth": {"status": "confirmed"}},
+    {"id": "b-possible", "company": "Aurora NV", "role": "Engineer",
+     "posted_date": "2026-07-14", "work_auth": {"status": "possible"}},
+    {"id": "a-notfound", "company": "Beacon BV", "role": "Engineer",
+     "posted_date": "2026-07-14", "work_auth": {"status": "not_found"}}
+  ],
+  "expect": {"order": ["c-confirmed", "b-possible", "a-notfound"]}
+}

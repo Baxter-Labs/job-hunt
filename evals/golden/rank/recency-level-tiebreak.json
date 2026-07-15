@@ -1,0 +1,15 @@
+{
+  "id": "recency-level-tiebreak",
+  "synthetic": true,
+  "today": "2026-07-15",
+  "target_levels": ["senior"],
+  "listings": [
+    {"id": "stale-senior", "company": "Nimbus BV", "role": "Senior Engineer",
+     "posted_date": "2026-05-01", "work_auth": {"status": "confirmed"}},
+    {"id": "fresh-junior", "company": "Cobalt BV", "role": "Junior Engineer",
+     "posted_date": "2026-07-13", "work_auth": {"status": "confirmed"}},
+    {"id": "fresh-senior", "company": "Delta BV", "role": "Senior Engineer",
+     "posted_date": "2026-07-13", "work_auth": {"status": "confirmed"}}
+  ],
+  "expect": {"order": ["fresh-senior", "fresh-junior", "stale-senior"]}
+}
