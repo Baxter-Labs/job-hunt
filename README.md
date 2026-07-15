@@ -174,3 +174,18 @@ Adding a new work-authorisation scheme or wiring up a new platform doesn't
 require touching the skills' prompts — see
 [docs/EXTENDING.md](docs/EXTENDING.md) for the provider interface and the
 registry you plug into.
+
+## Documentation
+
+- [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) — what each command/feature
+  needs, and how it degrades when a dependency is missing.
+- [docs/EXTENDING.md](docs/EXTENDING.md) — how to add a work-authorisation
+  scheme or a search platform.
+- [DATA_CONTRACT.md](DATA_CONTRACT.md) — the schema of every workspace
+  artifact (`profile.json`, `cv_master.json`, `tailored_cv.json`,
+  `ats_report.json`, `tracker.csv`), and which module validates each.
+- [LEGAL_DISCLAIMER.md](LEGAL_DISCLAIMER.md) — what Job Hunt does and does
+  not guarantee; read this before relying on it for a real application.
+- [CONTRIBUTING.md](CONTRIBUTING.md) — how to set up a dev environment, run
+  the test suite, and the repository's conventions.
+- [CHANGELOG.md](CHANGELOG.md) — release history.
