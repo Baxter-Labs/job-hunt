@@ -62,6 +62,8 @@ def cmd_readiness(args: argparse.Namespace) -> int:
         raise ValueError("--pack <slug|dir> is required.")
     output_root = Path(args.output_root) if args.output_root else None
     pack_dir = preapply.resolve_pack_dir(args.pack, output_root=output_root)
+    if not pack_dir.is_dir():
+        raise ValueError(f"pack not found: {pack_dir} — run /job-tailor first")
     jd_text = _resolve_jd(args, pack_dir)
     master_cv = load_master_cv()
     report = readiness.readiness_report(pack_dir, master_cv, jd_text)

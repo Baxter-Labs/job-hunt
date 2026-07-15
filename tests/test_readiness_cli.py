@@ -116,6 +116,19 @@ def test_readiness_no_jd_anywhere_is_json_exit1(tmp_path):
     assert out["ok"] is False and "error" in out
 
 
+def test_readiness_missing_pack_dir_is_json_exit1_and_creates_nothing(tmp_path):
+    # A typo'd --pack slug that resolves under output/ but doesn't exist must fail
+    # cleanly (exit 1, JSON error) — not silently mkdir a phantom pack dir.
+    home, _ = _home(tmp_path, tailored=_tailored())
+    phantom = home / "output" / "does-not-exist-role"
+    assert not phantom.exists()
+    proc = _run(["readiness", "--pack", "does-not-exist-role", "--jd-text", JD], home)
+    assert proc.returncode == 1
+    out = json.loads(proc.stdout)
+    assert out["ok"] is False and "error" in out
+    assert not phantom.exists()          # no phantom pack dir was created
+
+
 def test_readiness_missing_master_json_exit1(tmp_path):
     home = tmp_path / "empty"
     (home / "output" / "p").mkdir(parents=True)         # pack exists, master does not

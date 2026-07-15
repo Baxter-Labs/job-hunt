@@ -15,10 +15,13 @@ it stronger — honestly?" before /job-apply. Combines four documented factors:
                           job-side context — a red flag is about the JOB, never
                           the user's fault.
 
-FABRICATION IS A HARD GATE. If the pack's tailored_cv.json has
-fabrication_check.passed == False, readiness is BLOCKING: readiness_score is
-capped at 0 and a fail factor "Fabrication check must pass" leads the checklist.
-We never present a fabricated pack as ready.
+FABRICATION IS A HARD GATE, and it FAILS SAFE. Readiness is BLOCKING (readiness_score
+capped at 0, a leading fail factor) unless the pack's tailored_cv.json can be read AND
+its fabrication_check.passed is literally True. A missing tailored_cv.json, a missing/
+null/non-bool fabrication_check.passed, or a corrupt/unreadable pack are all treated
+the same as an explicit fabrication_check.passed == False: blocked. We never present a
+pack as ready — and never print a reassuring "no fabricated facts" — unless the engine
+has positively confirmed it.
 
 Improvement suggestions are HONEST and split by provenance:
   * has-but-unsurfaced — a JD keyword the user GENUINELY has (in the master
@@ -82,7 +85,9 @@ def load_tailored_cv(pack_dir: Path) -> Optional[dict[str, Any]]:
 
 def _master_keyword_text(master_cv: dict[str, Any]) -> str:
     """Flatten summary + skill names + experience titles/bullets — the honest
-    'what the user genuinely has' blob (same shape fit.py uses for skills)."""
+    'what the user genuinely has' blob (same shape fit.py uses for skills).
+    NOTE: duplicates fit._master_text byte-for-byte on purpose (kept local to avoid
+    a cross-module coupling risk). Keep the two in sync if either changes."""
     parts: list[str] = [str(master_cv.get("summary", "") or "")]
     for s in master_cv.get("skills") or []:
         if isinstance(s, dict) and isinstance(s.get("name"), str):
@@ -102,20 +107,31 @@ def _contact_complete(tailored: Optional[dict[str, Any]]) -> bool:
 
 
 def _fabrication_factor(tailored: Optional[dict[str, Any]]) -> tuple[dict[str, str], bool]:
-    """Return (factor, blocking). Hard gate: fabrication_check.passed is False."""
+    """HARD GATE. Return (factor, blocking). Blocks unless we can positively confirm
+    the tailored CV passed the engine's fabrication check. Missing tailored_cv.json,
+    a missing/null/non-bool fabrication_check.passed, or a corrupt/unreadable pack all
+    fail SAFE (blocking=True) — we never present an unverified pack as ready, and we
+    never print a reassuring "No fabricated facts" for an unknown state."""
     if tailored is None:
-        return ({"name": "Fabrication check", "status": "warn",
-                 "detail": "No tailored_cv.json in the pack to verify — run /job-tailor first."},
+        return ({"name": "Fabrication check", "status": "fail",
+                 "detail": "No readable tailored_cv.json — cannot verify the CV is "
+                           "fabrication-free. Run /job-tailor first."},
+                True)
+    passed = (tailored.get("fabrication_check") or {}).get("passed")
+    if passed is True:
+        return ({"name": "Fabrication check", "status": "pass",
+                 "detail": "No fabricated facts — the tailored CV stays within your master."},
                 False)
-    fab = tailored.get("fabrication_check") or {}
-    if fab.get("passed") is False:
+    if passed is False:
         return ({"name": "Fabrication check must pass", "status": "fail",
                  "detail": ("The tailored CV contains facts not in your master CV. This is a "
                             "hard gate — not ready to apply. Re-run /job-tailor.")},
                 True)
-    return ({"name": "Fabrication check", "status": "pass",
-             "detail": "No fabricated facts — the tailored CV stays within your master."},
-            False)
+    # key absent / null / non-bool -> cannot positively confirm -> block (fail safe).
+    return ({"name": "Fabrication check", "status": "fail",
+             "detail": "Fabrication check result missing or unreadable — cannot confirm the "
+                       "CV is fabrication-free. Re-run /job-tailor."},
+            True)
 
 
 def _ats_factor(pack_dir: Path) -> tuple[int, dict[str, str]]:
@@ -123,7 +139,7 @@ def _ats_factor(pack_dir: Path) -> tuple[int, dict[str, str]]:
     if not report or not isinstance(report.get("match_score"), int):
         return 0, {"name": "ATS match", "status": "fail",
                    "detail": "No ats_report.json / match_score in the pack — run /job-tailor."}
-    score = int(report["match_score"])
+    score = max(0, min(100, int(report["match_score"])))
     detail = (f"ATS keyword coverage {score}/100 "
               f"({report.get('matched_count', 0)}/{report.get('total_keywords', 0)} keywords).")
     return score, {"name": "ATS match", "status": _band(score), "detail": detail}
@@ -217,7 +233,9 @@ def readiness_report(
     rf_sub, rf_factor = _redflag_factor(jd_text)
 
     subscores = {"ats": ats_sub, "fit": fit_sub, "completeness": comp_sub, "redflags": rf_sub}
-    readiness_score = 0 if blocking else round(sum(WEIGHTS[k] * subscores[k] for k in WEIGHTS))
+    readiness_score = 0 if blocking else max(
+        0, min(100, round(sum(WEIGHTS[k] * subscores[k] for k in WEIGHTS)))
+    )
 
     return {
         "readiness_score": readiness_score,

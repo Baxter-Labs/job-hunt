@@ -172,6 +172,8 @@ def _seniority_component(master_cv: dict[str, Any], jd_text: str) -> tuple[int, 
 
 
 def _master_text(master_cv: dict[str, Any]) -> str:
+    """NOTE: duplicated by readiness._master_keyword_text byte-for-byte on purpose
+    (kept local to avoid a cross-module coupling risk). Keep the two in sync."""
     parts: list[str] = [str(master_cv.get("summary", "") or "")]
     for s in master_cv.get("skills") or []:
         if isinstance(s, dict) and isinstance(s.get("name"), str):

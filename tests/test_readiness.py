@@ -97,6 +97,39 @@ def test_clean_pack_not_blocking_and_fabrication_passes(tmp_path):
     assert r["readiness_score"] > 0
 
 
+def test_gate_blocks_when_fabrication_check_key_absent(tmp_path):
+    # tailored_cv.json present but NO fabrication_check key at all -> fail SAFE:
+    # must block, score 0, and must NOT claim "No fabricated facts".
+    tailored = {
+        "schema_version": "1.0",
+        "contact": {"name": "Ada Lovelace", "email": "ada@example.com"},
+        "summary": "Engineer.", "skills_grouped": [], "experience": [],
+        # no "fabrication_check" key
+    }
+    pack = _seed_pack(tmp_path, tailored=tailored)
+    r = readiness.readiness_report(pack, MASTER, STRONG_JD)
+    assert r["blocking"] is True and r["readiness_score"] == 0
+    assert not any("No fabricated facts" in f.get("detail", "") for f in r["factors"])
+
+
+def test_gate_blocks_when_passed_is_null(tmp_path):
+    tailored = _tailored()
+    tailored["fabrication_check"] = {"passed": None, "issues": []}
+    pack = _seed_pack(tmp_path, tailored=tailored)
+    r = readiness.readiness_report(pack, MASTER, STRONG_JD)
+    assert r["blocking"] is True and r["readiness_score"] == 0
+    assert not any("No fabricated facts" in f.get("detail", "") for f in r["factors"])
+
+
+def test_gate_blocks_when_tailored_cv_corrupt(tmp_path):
+    pack = tmp_path / "acme-role"
+    pack.mkdir(parents=True)
+    (pack / "tailored_cv.json").write_text("{ this is not valid json", encoding="utf-8")
+    r = readiness.readiness_report(pack, MASTER, STRONG_JD)
+    assert r["blocking"] is True and r["readiness_score"] == 0
+    assert not any("No fabricated facts" in f.get("detail", "") for f in r["factors"])
+
+
 def test_weighting_is_exact_blend(tmp_path):
     # Reconstruct the blend from the sub-scores exposed via the factors/details.
     pack = _seed_pack(tmp_path, ats_score=72, tailored=_tailored())
@@ -109,6 +142,17 @@ def test_weighting_is_exact_blend(tmp_path):
     rf_sub = max(0, 100 - penalty)
     expected = round(0.35*ats_sub + 0.25*fit_sub + 0.25*comp_sub + 0.15*rf_sub)
     assert r["readiness_score"] == expected
+
+
+def test_scores_are_clamped_to_0_100_even_with_corrupt_match_score(tmp_path):
+    # A corrupt/out-of-range ats_report.json (match_score: 150) must never push the
+    # ATS sub-score or the final readiness_score above 100.
+    pack = _seed_pack(tmp_path, ats_score=150, tailored=_tailored())
+    r = readiness.readiness_report(pack, MASTER, STRONG_JD)
+    ats_factor = [f for f in r["factors"] if f["name"] == "ATS match"][0]
+    assert "100/100" in ats_factor["detail"]
+    assert "150" not in ats_factor["detail"]
+    assert 0 <= r["readiness_score"] <= 100
 
 
 def test_suggestion_has_but_unsurfaced_says_re_tailor_not_upskill(tmp_path):
