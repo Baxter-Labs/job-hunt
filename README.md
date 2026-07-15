@@ -1,14 +1,18 @@
 # Job Hunt
 
-A Claude Code plugin that finds jobs, writes fabrication-checked tailored CVs
-and cover letters from your own past CVs, and applies for you — with a human
-in the loop for every irreversible step. It is region-agnostic: you choose
-which job platforms to search and which work-authorisation scheme (if any)
-applies to you as plain settings, not hardcoded logic.
+Job Hunt finds jobs, writes fabrication-checked tailored CVs and cover
+letters from your own past CVs, and applies for you — with a human in the
+loop for every irreversible step. It is region-agnostic: you choose which
+job platforms to search and which work-authorisation scheme (if any) applies
+to you as plain settings, not hardcoded logic.
 
-The plugin ships as five slash commands that share one workspace and one
-engine: `/job-setup` → `/job-search` → `/job-tailor` → `/job-apply` →
-`/job-track`.
+It ships as a **Claude Code plugin** — nine slash commands that share one
+workspace and one deterministic Python engine: `/job-setup` → `/job-search`
+→ `/job-tailor` → `/job-apply` → `/job-track` (plus `/job-redflag`,
+`/job-upskill`, `/job-interview-prep`, `/job-followup`). Under the hood it's
+just Python CLIs and markdown skill instructions, so it also runs in Codex
+CLI, Cursor, opencode, and other AI coding agents — see
+[Use it in other AI agents](#use-it-in-other-ai-agents-codex-cursor-) below.
 
 ## Dashboard preview
 
@@ -179,8 +183,26 @@ require touching the skills' prompts — see
 [docs/EXTENDING.md](docs/EXTENDING.md) for the provider interface and the
 registry you plug into.
 
+## Use it in other AI agents (Codex, Cursor, …)
+
+Job Hunt is a Claude Code plugin, but underneath it's just Python CLIs in
+`plugins/job-hunt/scripts/` and plain-markdown instructions in
+`plugins/job-hunt/skills/*/SKILL.md`. Any agent with shell access can clone
+this repo, install the one required dependency, and run the same engine —
+Codex CLI and opencode read [AGENTS.md](AGENTS.md) by convention, and Cursor
+picks up [`.cursor/rules/job-hunt.mdc`](.cursor/rules/job-hunt.mdc). The
+offline features (`/job-setup`, `/job-tailor`, `/job-upskill`,
+`/job-redflag`, `/job-followup`, `/job-interview-prep`, `/job-track`) need
+only Python; `/job-search` and `/job-apply` need MCP tools (job-board
+search, browser automation) configured in that agent's own MCP settings.
+See [docs/PLATFORMS.md](docs/PLATFORMS.md) for the full per-platform guide.
+
 ## Documentation
 
+- [AGENTS.md](AGENTS.md) — cross-agent guide: setup, workspace model, and
+  the command catalog, for Codex CLI, opencode, and any shell-capable agent.
+- [docs/PLATFORMS.md](docs/PLATFORMS.md) — using Job Hunt in Claude Code,
+  Codex CLI, Cursor, opencode, or any other AI agent.
 - [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) — what each command/feature
   needs, and how it degrades when a dependency is missing.
 - [docs/EXTENDING.md](docs/EXTENDING.md) — how to add a work-authorisation

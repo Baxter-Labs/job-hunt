@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added cross-platform usage docs so the plugin can be used from any AI
+  coding agent, not just Claude Code: `AGENTS.md` (setup, workspace model,
+  command catalog for Codex CLI / opencode / any shell-capable agent),
+  `.cursor/rules/job-hunt.mdc` (a Cursor project rule pointing at `AGENTS.md`
+  and the relevant `SKILL.md`), and `docs/PLATFORMS.md` (a per-platform
+  "what works where" guide covering Claude Code, Codex CLI, Cursor, opencode,
+  and generic shell-capable agents). README and CHANGELOG updated to reflect
+  that the engine isn't Claude-Code-only. Docs only — no code changes.
 - Added a deterministic quality-evals harness (`evals/`): domain-diverse golden
   cases for ATS scoring and listing ranking, a scorecard CLI
   (`evals/run_evals.py`), and a `pytest` gate (`tests/test_evals.py`) with

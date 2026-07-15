@@ -1,0 +1,33 @@
+---
+description: Job Hunt — job search, CV tailoring, and assisted apply tool. Read this before acting on any job-hunt-related request in this repo.
+alwaysApply: false
+---
+
+This repo is **Job Hunt**: a job-search / CV-tailoring / assisted-apply tool
+built as a Claude Code plugin but runnable from any agent with shell access.
+
+Before doing anything job-hunt-related:
+
+1. Read `AGENTS.md` at the repo root — it has the setup steps, the workspace
+   model (`$JOB_HUNT_HOME`, default `~/.job-hunt`), and a command catalog.
+2. Open the matching `plugins/job-hunt/skills/<name>/SKILL.md` for the
+   capability requested (e.g. `job-setup`, `job-search`, `cv-tailor`,
+   `job-apply`, `job-track`, `job-upskill`, `job-redflag`, `job-followup`,
+   `interview-prep`) and follow it step by step — the SKILL.md files are the
+   source of truth for process, not this rule.
+3. Run the Python CLIs from `plugins/job-hunt/scripts/` using the project's
+   venv (`.venv/bin/python -m <package>.<cli> <subcommand>`), per
+   `AGENTS.md`.
+
+Non-negotiable safety rules (see `AGENTS.md` for full detail):
+
+- Never store, type, or ask for a password, credential, token, or 2FA code.
+- Assisted apply (`job-apply`) stops at any CAPTCHA, login/SSO, or
+  consent/terms step and hands control back to the user; submit requires
+  user confirmation unless durably opted in.
+- Never fabricate CV/cover-letter content — only reorder/rephrase facts
+  already in the user's `cv_master.json`; the fabrication check must pass.
+- `job-followup` produces a draft only and never sends anything.
+- `job-search` / `job-apply` need MCP tools (job-board search, browser
+  automation) configured in Cursor's own MCP settings; if unavailable, skip
+  the feature and say so rather than faking results.
