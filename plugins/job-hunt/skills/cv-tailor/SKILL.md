@@ -74,7 +74,8 @@ hand-edit workspace files.
    user should only add ones they genuinely have — re-tailor if so, never
    fabricate), confirm **fabrication_check PASSED — nothing fabricated**, note any
    advisory `humanizer_flags`, and give the pack path with its files
-   (`cv.pdf`, `cover_letter.pdf`, `ats_report.json`, `change_log.md`).
+   (`cv.pdf`, `cover_letter.pdf` (or `cover_letter.html` if weasyprint is not
+   installed), `ats_report.json`, `change_log.md`).
 
 ## Rules
 

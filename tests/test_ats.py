@@ -81,6 +81,22 @@ def test_cv_text_from_tailored_flattens_fields():
         assert token in text
 
 
+def test_cv_text_from_tailored_excludes_unrendered_ats_keywords():
+    # A keyword present ONLY in ats_keywords_used must NOT count as CV coverage:
+    # the renderer never emits that field, so the ATS score stays honest.
+    tailored = {
+        "contact": {"title": "Backend Engineer"},
+        "summary": "Ships Python services.",
+        "skills_grouped": [{"group": "Core", "skills": ["Python"]}],
+        "experience": [{"title": "Engineer", "bullets": ["Built services."]}],
+        "highlights": [],
+        "ats_keywords_used": ["kubernetes"],
+    }
+    text = ats.cv_text_from_tailored(tailored).lower()
+    assert "kubernetes" not in text
+    assert "python" in text
+
+
 def test_write_ats_report(tmp_path):
     report = ats.build_ats_report("Python role.", "Python dev.", "Acme", "Dev")
     path = ats.write_ats_report(report, tmp_path)

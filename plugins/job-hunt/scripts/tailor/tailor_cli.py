@@ -75,6 +75,9 @@ def cmd_mock_pack(args: argparse.Namespace) -> int:
 def cmd_finalize(args: argparse.Namespace) -> int:
     workspace.ensure_workspace()
     tailored = json.loads(Path(args.tailored_file).read_text(encoding="utf-8"))
+    if not isinstance(tailored, dict):
+        _emit({"ok": False, "error": "tailored_cv file must contain a JSON object"})
+        return 1
     result = pipeline.finalize_pack(
         company=args.company, role=args.role, tailored=tailored,
         jd_text=_jd_text(args), model=args.model,

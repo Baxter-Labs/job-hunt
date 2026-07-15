@@ -116,3 +116,14 @@ def test_finalize_fails_loudly_on_fabrication(tmp_path):
     out = json.loads(proc.stdout)
     assert out["ok"] is False
     assert out["fabrication_passed"] is False
+
+
+def test_finalize_rejects_non_object_tailored(tmp_path):
+    home = _setup(tmp_path)
+    tf = tmp_path / "arr.json"
+    tf.write_text("[]", encoding="utf-8")
+    proc = _run(["finalize", "--company", "Acme", "--role", "Backend Engineer",
+                 "--jd-text", "Python role.", "--tailored-file", str(tf)], home)
+    assert proc.returncode == 1
+    out = json.loads(proc.stdout)   # clean JSON, not a traceback
+    assert out["ok"] is False and "error" in out

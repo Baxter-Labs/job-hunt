@@ -144,7 +144,8 @@ def ats_score(matched_count: int, total: int) -> int:
 def cv_text_from_tailored(tailored: dict[str, Any]) -> str:
     """Flatten a tailored_cv dict's human-readable fields into one text blob for
     keyword matching (title, summary, skill groups + skills, experience titles +
-    bullets, highlights, ats_keywords_used)."""
+    bullets, highlights). Excludes `ats_keywords_used`, which the renderer does
+    not emit, so the score reflects the actual deliverable."""
     parts: list[str] = []
     contact = tailored.get("contact", {}) or {}
     parts.append(str(contact.get("title", "")))
@@ -158,7 +159,6 @@ def cv_text_from_tailored(tailored: dict[str, Any]) -> str:
             parts.append(str(entry.get("title", "")))
             parts.extend(str(b) for b in entry.get("bullets", []) or [])
     parts.extend(str(h) for h in tailored.get("highlights", []) or [])
-    parts.extend(str(k) for k in tailored.get("ats_keywords_used", []) or [])
     return "\n".join(p for p in parts if p)
 
 
