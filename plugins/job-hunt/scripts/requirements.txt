@@ -3,3 +3,7 @@ pypdf>=4.0
 # renderer falls back to reportlab, then a dependency-free stdlib PDF writer,
 # so a missing weasyprint degrades PDF quality but never breaks the pipeline.
 weasyprint>=60
+# Optional: only needed for `/job-track dashboard` (the ported Flask tracker
+# UI). The plain `/job-track` text summary never imports Flask; the dashboard
+# test module (tests/test_dashboard.py) skips cleanly when Flask is absent.
+flask>=3.0
