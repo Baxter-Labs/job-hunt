@@ -80,7 +80,7 @@ def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
     try:
         return args.func(args)
-    except (ValueError, FileNotFoundError, json.JSONDecodeError) as exc:
+    except (ValueError, FileNotFoundError, json.JSONDecodeError, OSError) as exc:
         _emit({"ok": False, "error": str(exc)})
         return 1
 
