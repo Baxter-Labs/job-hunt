@@ -1,0 +1,15 @@
+{
+  "id": "dataml-engineer",
+  "synthetic": true,
+  "company": "Aurora NV",
+  "role": "Machine Learning Engineer",
+  "jd": "Machine Learning Engineer. Work with PyTorch and TensorFlow on deep learning models. Python, SQL, Spark and Airflow. MLOps and NLP experience valued.",
+  "cv_text": "ML engineer. Trained deep learning models in PyTorch. Strong Python and SQL. Built NLP pipelines.",
+  "expect": {
+    "score_min": 51,
+    "score_max": 57,
+    "must_match": ["python", "sql", "pytorch", "deep learning", "nlp"],
+    "must_miss": ["tensorflow", "spark", "airflow", "mlops", "machine learning"],
+    "must_not_appear": []
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "product-manager",
+  "synthetic": true,
+  "company": "Delta BV",
+  "role": "Product Manager",
+  "jd": "Product Manager. Own the roadmap and stakeholder management. Agile and Scrum. Use Jira and A/B testing. Data analysis for decisions.",
+  "cv_text": "PM. Owned roadmap and stakeholder management. Ran Agile Scrum in Jira. Used A/B testing and data analysis.",
+  "expect": {
+    "score_min": 64,
+    "score_max": 70,
+    "must_match": ["agile", "scrum", "jira", "roadmap", "stakeholder management", "a/b testing", "data analysis"],
+    "must_miss": ["product"],
+    "must_not_appear": []
+  }
+}

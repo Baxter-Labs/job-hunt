@@ -1,0 +1,15 @@
+{
+  "id": "guard-trailing-punctuation",
+  "synthetic": true,
+  "company": "Ada Lovelace Labs BV",
+  "role": "Platform Engineer",
+  "jd": "You will own our platform. Experience with Kubernetes. Strong Python. Docker.",
+  "cv_text": "Engineer with Python and Docker experience.",
+  "expect": {
+    "score_min": 37,
+    "score_max": 43,
+    "must_match": ["python", "docker"],
+    "must_miss": ["kubernetes"],
+    "must_not_appear": ["kubernetes.", "python.", "docker."]
+  }
+}

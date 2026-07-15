@@ -1,0 +1,15 @@
+{
+  "id": "finance-analyst",
+  "synthetic": true,
+  "company": "Cobalt BV",
+  "role": "Financial Analyst",
+  "jd": "Financial Analyst. Build financial modelling in Excel. Own budgeting and forecasting. Accounting knowledge and SQL for reporting. Tableau dashboards.",
+  "cv_text": "Analyst. Built financial modelling in Excel and Tableau. Owned budgeting. Basic SQL reporting.",
+  "expect": {
+    "score_min": 55,
+    "score_max": 61,
+    "must_match": ["excel", "tableau", "financial modelling", "budgeting", "sql"],
+    "must_miss": ["forecasting", "accounting"],
+    "must_not_appear": []
+  }
+}

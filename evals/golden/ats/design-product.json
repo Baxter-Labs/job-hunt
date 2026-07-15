@@ -1,0 +1,15 @@
+{
+  "id": "design-product",
+  "synthetic": true,
+  "company": "Nimbus BV",
+  "role": "Product Designer",
+  "jd": "Product Designer. Lead user research and wireframing in Figma. Prototyping and design systems. Collaborate with stakeholders on roadmap.",
+  "cv_text": "Designer. Ran user research and wireframing in Figma. Built prototyping flows and design systems.",
+  "expect": {
+    "score_min": 55,
+    "score_max": 61,
+    "must_match": ["figma", "user research", "wireframing", "prototyping"],
+    "must_miss": ["roadmap"],
+    "must_not_appear": []
+  }
+}

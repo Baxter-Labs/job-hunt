@@ -1,0 +1,15 @@
+{
+  "id": "marketing-growth",
+  "synthetic": true,
+  "company": "Beacon BV",
+  "role": "Growth Marketing Manager",
+  "jd": "Growth Marketing Manager. Own SEO and SEM. Run Google Analytics and HubSpot. Drive content marketing and email marketing campaigns. Copywriting skills essential.",
+  "cv_text": "Marketing manager. Led SEO strategy and content marketing. Ran HubSpot email marketing. Strong copywriting.",
+  "expect": {
+    "score_min": 40,
+    "score_max": 46,
+    "must_match": ["seo", "hubspot", "content marketing", "email marketing", "copywriting"],
+    "must_miss": ["sem", "google analytics"],
+    "must_not_appear": []
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "software-backend",
+  "synthetic": true,
+  "company": "Meridian BV",
+  "role": "Senior Backend Engineer",
+  "jd": "Senior Backend Engineer. We build microservices in Python and Go. Strong SQL, Docker and Kubernetes required. AWS and CI/CD a plus. REST APIs daily.",
+  "cv_text": "Backend engineer. Built Python microservices and REST APIs. Deep SQL and Docker experience. Deployed on AWS.",
+  "expect": {
+    "score_min": 56,
+    "score_max": 62,
+    "must_match": ["python", "sql", "docker", "aws", "rest", "microservices"],
+    "must_miss": ["go", "kubernetes", "ci/cd"],
+    "must_not_appear": []
+  }
+}
