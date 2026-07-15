@@ -10,6 +10,19 @@ Pure and offline. Blends three sub-scores with fixed, documented weights:
   * seniority  — JD seniority cue vs the master's latest title (or rough years),
                  scored by distance on an ordered ladder; ambiguous → neutral 70.
 
+Seniority detection is TITLE-SCOPED, not whole-text: the JD side reads only its
+first non-empty line (JD titles are line 1 by convention) and the master side
+reads only the most-recent (first) experience entry's title — never the JD
+body prose or CV bullets. This avoids false positives from ordinary sentences
+like "you will lead the design and manage a staff of engineers". Within that
+title text, an AMBIGUOUS cue (junior, mid, senior, staff, lead, associate)
+counts as a signal only if the same text also contains a role noun (engineer,
+developer, programmer, scientist, analyst, architect, designer, manager,
+consultant, administrator) — so "Lead Generation Specialist" is not read as
+level "lead" (no role noun; "specialist" is intentionally excluded). A STRONG
+cue (intern, principal, head, director, vp) may stand alone since it is rarely
+ordinary prose.
+
 Keyword extraction/matching is delegated ENTIRELY to tailor.ats — this module
 adds no second tokenizer. Nothing here ever invents facts: missing JD keywords
 are reported as honest gaps, never added to the CV. A low fit is a signal to
@@ -53,13 +66,48 @@ _CUES: tuple[tuple[int, tuple[str, ...]], ...] = (
 
 _YEAR_RE = re.compile(r"\b(?:19|20)\d{2}\b")
 
+# Bare cue words that double as ordinary prose (verbs/nouns) and so require a
+# role-noun in the same text before they count as a seniority signal. Multi-
+# word phrases (e.g. "team lead", "entry level") are unambiguous role titles
+# on their own and are NOT included here.
+_AMBIGUOUS_CUES: frozenset[str] = frozenset(
+    {"junior", "mid", "senior", "staff", "lead", "associate"}
+)
+
+_ROLE_NOUNS: tuple[str, ...] = (
+    "engineer", "developer", "programmer", "scientist", "analyst", "architect",
+    "designer", "manager", "consultant", "administrator",
+)
+
+
+def _first_line(text: str) -> str:
+    """The first non-empty line of `text` (JD/experience titles are line 1)."""
+    for line in (text or "").splitlines():
+        if line.strip():
+            return line
+    return ""
+
+
+def _has_role_noun(normalized_text: str) -> bool:
+    return any(
+        re.search(rf"(?<![a-z0-9]){re.escape(noun)}(?![a-z0-9])", normalized_text)
+        for noun in _ROLE_NOUNS
+    )
+
 
 def _cue_indices(text: str) -> list[int]:
-    """All ladder indices whose cue appears in `text` (word-boundary match)."""
+    """All ladder indices whose cue appears in `text` (word-boundary match).
+
+    Ambiguous single-word cues (see `_AMBIGUOUS_CUES`) only count if `text`
+    also contains a role noun — see module docstring.
+    """
     norm = ats.normalize(text or "")
+    has_role_noun = _has_role_noun(norm)
     hits: list[int] = []
     for idx, phrases in _CUES:
         for phrase in phrases:
+            if phrase in _AMBIGUOUS_CUES and not has_role_noun:
+                continue
             pat = rf"(?<![a-z0-9]){re.escape(ats.normalize(phrase))}(?![a-z0-9])"
             if re.search(pat, norm):
                 hits.append(idx)
@@ -68,7 +116,7 @@ def _cue_indices(text: str) -> list[int]:
 
 
 def _jd_seniority(jd_text: str) -> Optional[int]:
-    hits = _cue_indices(jd_text)
+    hits = _cue_indices(_first_line(jd_text))
     return max(hits) if hits else None
 
 

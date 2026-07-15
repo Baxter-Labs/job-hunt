@@ -108,3 +108,41 @@ def test_master_above_ask_direction():
     r = fit.fit_report(_master(), jd)                # senior(3) vs junior(1) → distance 2 → 60
     assert r["components"]["seniority"] == 60
     assert any("above the ask" in s for s in r["reasons"])
+
+
+_SENIOR_MASTER = {
+    "summary": "Backend engineer.",
+    "skills": [{"name": "Python", "category": "Programming", "level": None},
+               {"name": "SQL", "category": "Data", "level": None}],
+    "experience": [{"company": "Acme", "title": "Senior Backend Engineer",
+                    "location": "Remote", "dates": "2018 – 2024",
+                    "bullets": ["Built and ran production services."]}],
+}
+
+
+def test_jd_body_verbs_do_not_change_seniority():
+    # 'lead'/'staff' as prose verbs/nouns in the JD BODY must not inflate the target level.
+    clean = fit.fit_report(_SENIOR_MASTER, "Senior Backend Engineer\nPython and SQL required.")
+    noisy = fit.fit_report(_SENIOR_MASTER,
+        "Senior Backend Engineer\nYou will lead the design of microservices and manage a "
+        "staff of engineers. Python and SQL.")
+    assert clean["components"]["seniority"] == noisy["components"]["seniority"] == 100
+
+
+def test_clean_title_seniority_mismatch_still_detected():
+    # A genuinely higher title in the JD's first line is still detected as a mismatch.
+    r = fit.fit_report(_SENIOR_MASTER, "Principal Backend Engineer\nPython and SQL.")
+    assert r["components"]["seniority"] < 100
+    assert any("principal" in reason.lower() for reason in r["reasons"])
+
+
+def test_master_compound_title_not_read_as_lead():
+    # 'Lead Generation Specialist' must NOT be read as seniority level 'lead'.
+    master = {"summary": "Marketing.",
+              "skills": [{"name": "SEO", "category": "Marketing", "level": None}],
+              "experience": [{"company": "Acme", "title": "Lead Generation Specialist",
+                              "location": "Remote", "dates": "2020 – 2024",
+                              "bullets": ["Ran demand-gen campaigns."]}]}
+    r = fit.fit_report(master, "Senior Marketing Manager\nSEO and campaigns.")
+    assert "above the ask" not in " ".join(r["reasons"]).lower()
+    assert "level(s) up" not in " ".join(r["reasons"]).lower() or r["components"]["seniority"] >= 60

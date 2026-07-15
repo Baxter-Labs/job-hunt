@@ -6,10 +6,10 @@ loop for every irreversible step. It is region-agnostic: you choose which
 job platforms to search and which work-authorisation scheme (if any) applies
 to you as plain settings, not hardcoded logic.
 
-It ships as a **Claude Code plugin** — nine slash commands that share one
+It ships as a **Claude Code plugin** — ten slash commands that share one
 workspace and one deterministic Python engine: `/job-setup` → `/job-search`
 → `/job-tailor` → `/job-apply` → `/job-track` (plus `/job-redflag`,
-`/job-upskill`, `/job-interview-prep`, `/job-followup`). Under the hood it's
+`/job-upskill`, `/job-interview-prep`, `/job-followup`, `/job-fit`). Under the hood it's
 just Python CLIs and markdown skill instructions, so it also runs in Codex
 CLI, Cursor, opencode, and other AI coding agents — see
 [Use it in other AI agents](#use-it-in-other-ai-agents-codex-cursor-) below.
