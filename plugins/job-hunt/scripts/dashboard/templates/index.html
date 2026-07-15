@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Hunt Dashboard</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #242836;
+    --border: #2d3244;
+    --text: #e4e6f0;
+    --text2: #8b8fa3;
+    --accent: #6366f1;
+    --accent2: #818cf8;
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.12);
+    --yellow: #eab308;
+    --yellow-bg: rgba(234,179,8,0.12);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.12);
+    --blue: #3b82f6;
+    --blue-bg: rgba(59,130,246,0.12);
+    --orange: #f97316;
+    --orange-bg: rgba(249,115,22,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 48px;
+  }
+
+  /* Header */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header h1 .flag { font-size: 24px; }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .header-right .visa-badge {
+    background: var(--orange-bg);
+    color: var(--orange);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Stats Row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    padding: 24px 32px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .stat-card .label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+  .stat-card .value {
+    font-size: 32px;
+    font-weight: 700;
+  }
+  .stat-card .sub {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+  .stat-card.green .value { color: var(--green); }
+  .stat-card.blue .value { color: var(--blue); }
+  .stat-card.accent .value { color: var(--accent2); }
+  .stat-card.yellow .value { color: var(--yellow); }
+  .stat-card.orange .value { color: var(--orange); }
+
+  /* Filter bar */
+  .filter-bar {
+    padding: 0 32px 16px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .search-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    width: 250px;
+    outline: none;
+  }
+  .search-input:focus { border-color: var(--accent); }
+
+  /* Table */
+  .table-wrap {
+    margin: 0 32px 32px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .jobs-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--surface);
+    min-width: 800px;
+  }
+  .jobs-table th {
+    background: var(--surface2);
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text2);
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+  }
+  .jobs-table th:hover { color: var(--text); }
+  .jobs-table td {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 14px;
+    vertical-align: middle;
+  }
+  .jobs-table tr:hover td {
+    background: rgba(99,102,241,0.04);
+  }
+  .jobs-table tr.expanded td {
+    background: var(--surface2);
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-green { background: var(--green-bg); color: var(--green); }
+  .badge-yellow { background: var(--yellow-bg); color: var(--yellow); }
+  .badge-red { background: var(--red-bg); color: var(--red); }
+  .badge-blue { background: var(--blue-bg); color: var(--blue); }
+  .badge-orange { background: var(--orange-bg); color: var(--orange); }
+  .badge-gray { background: rgba(139,143,163,0.12); color: var(--text2); }
+
+  /* ATS Score Bar */
+  .ats-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ats-bar {
+    width: 60px;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .ats-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+  .ats-pct { font-size: 13px; font-weight: 600; min-width: 38px; }
+
+  /* Source badge */
+  .source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text2);
+  }
+  .source-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .source-dot.indeed { background: var(--blue); }
+  .source-dot.career { background: var(--green); }
+  .source-dot.linkedin { background: #0a66c2; }
+  .source-dot.academic { background: #8b5cf6; }
+
+  /* Action buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .btn-apply {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-apply:hover { background: var(--accent2); }
+  .btn-download {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-download:hover { border-color: var(--accent); color: var(--accent2); }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+
+  /* Expand row */
+  .expand-btn {
+    background: none;
+    border: none;
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    transition: transform 0.2s;
+  }
+  .expand-btn.open { transform: rotate(90deg); }
+  .detail-row { display: none; }
+  .detail-row.show { display: table-row; }
+  .detail-cell {
+    padding: 0 16px 20px 48px !important;
+    border-top: none !important;
+  }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .detail-section {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .detail-section h4 {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+  .file-list { list-style: none; }
+  .file-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .file-list li:last-child { border-bottom: none; }
+  .file-name { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .file-size { font-size: 11px; color: var(--text2); }
+  .keyword-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .kw-tag {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+  .kw-matched { background: var(--green-bg); color: var(--green); }
+  .kw-missing { background: var(--red-bg); color: var(--red); }
+  .jd-preview {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+    max-height: 120px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+
+  /* Status select */
+  .status-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+  }
+  .status-select:focus { border-color: var(--accent); }
+
+  /* Section titles */
+  .section-title {
+    padding: 8px 32px 16px;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title .count {
+    background: var(--surface2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--green);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    z-index: 1000;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .header { padding: 12px 16px; }
+    .table-wrap { margin-left: 16px; margin-right: 16px; }
+    .filter-bar, .section-title { padding-left: 16px; padding-right: 16px; }
+    .detail-grid { grid-template-columns: 1fr; }
+    body { padding-bottom: 32px; }
+  }
+
+  /* Company name styling */
+  .company-name { font-weight: 600; }
+  .role-name { color: var(--text2); font-size: 13px; }
+
+  /* Focus styles */
+  .filter-btn:focus-visible,
+  .btn:focus-visible,
+  .expand-btn:focus-visible,
+  .status-select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* NL flag icon */
+  .nl-flag {
+    width: 28px;
+    height: 20px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* No-pack badge */
+  .badge-nopack {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(139,143,163,0.12);
+    color: var(--text2);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1>Job Hunt Dashboard</h1>
+  <div class="header-right">
+    <span style="font-size:13px;color:var(--text2)">Application tracker</span>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat-card accent">
+    <div class="label">Total Jobs Tracked</div>
+    <div class="value">{{ stats.total }}</div>
+    <div class="sub">Across all sources</div>
+  </div>
+  <div class="stat-card green">
+    <div class="label">Packs Ready</div>
+    <div class="value">{{ stats.packs_ready }}</div>
+    <div class="sub">CV + Cover letter built</div>
+  </div>
+  <div class="stat-card blue">
+    <div class="label">Applied</div>
+    <div class="value">{{ stats.applied }}</div>
+    <div class="sub">Submitted to company</div>
+  </div>
+  <div class="stat-card yellow">
+    <div class="label">Work-auth OK</div>
+    <div class="value">{{ stats.work_auth_ok }}</div>
+    <div class="sub">Confirmed work authorisation</div>
+  </div>
+  <div class="stat-card orange">
+    <div class="label">Extra Packs</div>
+    <div class="value">{{ stats.extra_packs }}</div>
+    <div class="sub">From older pipeline runs</div>
+  </div>
+</div>
+
+<!-- Filter bar -->
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filterJobs('all')">All</button>
+  <button class="filter-btn" onclick="filterJobs('pack_generated')">Pack Ready</button>
+  <button class="filter-btn" onclick="filterJobs('not_applied')">Not Applied</button>
+  <button class="filter-btn" onclick="filterJobs('applied')">Applied</button>
+  <button class="filter-btn" onclick="filterJobs('confirmed')">Work-auth OK</button>
+  <button class="filter-btn" onclick="filterJobs('career_pages')">Career Pages</button>
+  <button class="filter-btn" onclick="filterJobs('indeed')">Indeed</button>
+  <button class="filter-btn" onclick="filterJobs('linkedin')">LinkedIn</button>
+  <input type="text" class="search-input" placeholder="Search company or role..." oninput="searchJobs(this.value)">
+</div>
+
+<!-- Tracked Jobs Table -->
+<div class="section-title">
+  Tracked Applications <span class="count">{{ jobs|length }}</span>
+</div>
+<div class="table-wrap">
+  <div class="table-scroll">
+  <table class="jobs-table" id="jobsTable">
+    <thead>
+      <tr>
+        <th style="width:30px"></th>
+        <th>Company / Role</th>
+        <th>Source</th>
+        <th>Work Auth</th>
+        <th>ATS Match</th>
+        <th>Status</th>
+        <th>Files</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr class="job-row"
+          data-status="{{ job.status }}"
+          data-workauth="{{ job.work_auth_status }}"
+          data-source="{{ job.source }}"
+          data-company="{{ job.company|lower }}"
+          data-role="{{ job.role|lower }}">
+        <td>
+          <button class="expand-btn" onclick="toggleDetail({{ job.id }}, this)" aria-label="Expand details for {{ job.company }}">&#9654;</button>
+        </td>
+        <td>
+          <div class="company-name">{{ job.company }}</div>
+          <div class="role-name">{{ job.role }}</div>
+        </td>
+        <td>
+          {% if job.source == 'indeed' %}
+            <span class="source-badge"><span class="source-dot indeed"></span> Indeed</span>
+          {% elif job.source == 'career_page' %}
+            <span class="source-badge"><span class="source-dot career"></span> Career Page</span>
+          {% elif job.source == 'linkedin' %}
+            <span class="source-badge"><span class="source-dot linkedin"></span> LinkedIn</span>
+          {% elif job.source == 'academictransfer' %}
+            <span class="source-badge"><span class="source-dot academic"></span> PhD / Academic</span>
+          {% else %}
+            <span class="source-badge">Manual</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if job.work_auth_status == 'confirmed' %}
+            <span class="badge badge-green">Confirmed</span>
+          {% elif job.work_auth_status == 'possible' %}
+            <span class="badge badge-yellow">Possible</span>
+          {% elif job.work_auth_status == 'flag' %}
+            <span class="badge badge-orange">Review</span>
+          {% elif job.work_auth_status == 'not_found' %}
+            <span class="badge badge-red">Not found</span>
+          {% else %}
+            <span class="badge badge-gray">n/a</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if job.ats_score is not none %}
+            <div class="ats-bar-wrap">
+              <div class="ats-bar">
+                <div class="ats-bar-fill" style="width:{{ job.ats_score }}%;background:{% if job.ats_score >= 80 %}var(--green){% elif job.ats_score >= 60 %}var(--yellow){% else %}var(--red){% endif %}"></div>
+              </div>
+              <span class="ats-pct" style="color:{% if job.ats_score >= 80 %}var(--green){% elif job.ats_score >= 60 %}var(--yellow){% else %}var(--red){% endif %}">{{ job.ats_score }}%</span>
+            </div>
+          {% else %}
+            <span style="color:var(--text2);font-size:12px">N/A</span>
+          {% endif %}
+        </td>
+        <td>
+          <select class="status-select" onchange="updateStatus({{ job.id }}, this.value)">
+            <option value="not_applied" {% if job.status == 'not_applied' %}selected{% endif %}>Not Applied</option>
+            <option value="pack_generated" {% if job.status == 'pack_generated' %}selected{% endif %}>Pack Ready</option>
+            <option value="applied" {% if job.status == 'applied' %}selected{% endif %}>Applied</option>
+            <option value="interview" {% if job.status == 'interview' %}selected{% endif %}>Interview</option>
+            <option value="assessment" {% if job.status == 'assessment' %}selected{% endif %}>Assessment</option>
+            <option value="offer" {% if job.status == 'offer' %}selected{% endif %}>Offer</option>
+            <option value="rejected" {% if job.status == 'rejected' %}selected{% endif %}>Rejected</option>
+            <option value="withdrawn" {% if job.status == 'withdrawn' %}selected{% endif %}>Withdrawn</option>
+          </select>
+        </td>
+        <td>
+          {% if job.has_pack %}
+            {% if 'cv.pdf' in job.pack_files %}
+              <a href="/download/{{ job.pack_slug }}/cv.pdf" class="btn btn-download btn-sm" title="Download CV">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                CV
+              </a>
+            {% endif %}
+            {% if 'cover_letter.pdf' in job.pack_files %}
+              <a href="/download/{{ job.pack_slug }}/cover_letter.pdf" class="btn btn-download btn-sm" title="Download Cover Letter" style="margin-left:4px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                Letter
+              </a>
+            {% endif %}
+          {% else %}
+            <span class="badge-nopack">No pack</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if job.url %}
+            <a href="{{ job.url }}" target="_blank" class="btn btn-apply btn-sm">
+              Apply &rarr;
+            </a>
+          {% endif %}
+        </td>
+      </tr>
+      <!-- Detail Row -->
+      <tr class="detail-row" id="detail-{{ job.id }}">
+        <td colspan="8" class="detail-cell">
+          <div class="detail-grid">
+            <!-- Files section -->
+            <div class="detail-section">
+              <h4>Application Pack Files</h4>
+              {% if job.has_pack %}
+              <ul class="file-list">
+                {% for fname, finfo in job.pack_files.items() %}
+                <li>
+                  <span class="file-name">
+                    {% if fname.endswith('.pdf') %}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    {% elif fname.endswith('.docx') %}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    {% else %}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    {% endif %}
+                    {{ fname }}
+                  </span>
+                  <span style="display:flex;align-items:center;gap:8px">
+                    <span class="file-size">{{ (finfo.size / 1024)|round(1) }}KB</span>
+                    <a href="/download/{{ job.pack_slug }}/{{ fname }}" class="btn btn-download btn-sm">Download</a>
+                  </span>
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <p style="color:var(--text2);font-size:13px">No application pack generated yet.</p>
+              {% endif %}
+            </div>
+
+            <!-- ATS + JD section -->
+            <div class="detail-section">
+              {% if job.ats_data %}
+              <h4>ATS Keyword Analysis ({{ job.ats_data.matched_count }}/{{ job.ats_data.total_keywords }} matched)</h4>
+              <div class="keyword-tags" style="margin-bottom:12px">
+                {% for kw in job.ats_data.matched_keywords %}
+                  <span class="kw-tag kw-matched">{{ kw }}</span>
+                {% endfor %}
+                {% for kw in job.ats_data.missing_keywords %}
+                  <span class="kw-tag kw-missing">{{ kw }}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+
+              {% if job.jd_preview %}
+              <h4 style="margin-top:8px">Job Description Preview</h4>
+              <div class="jd-preview">{{ job.jd_preview }}</div>
+              {% endif %}
+
+              <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+                {% if job.url %}
+                <a href="{{ job.url }}" target="_blank" class="btn btn-apply">
+                  Open Application Page &rarr;
+                </a>
+                {% endif %}
+                {% if job.has_pack and 'cv.pdf' in job.pack_files %}
+                <a href="/view/{{ job.pack_slug }}/cv.pdf" target="_blank" class="btn btn-download">
+                  Preview CV
+                </a>
+                {% endif %}
+                {% if job.has_pack and 'cover_letter.pdf' in job.pack_files %}
+                <a href="/view/{{ job.pack_slug }}/cover_letter.pdf" target="_blank" class="btn btn-download">
+                  Preview Letter
+                </a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% if extra_packs %}
+<!-- Extra Packs (from older runs, not in tracker) -->
+<div class="section-title" style="margin-top:16px">
+  Additional Packs (Not in Tracker) <span class="count">{{ extra_packs|length }}</span>
+</div>
+<div class="table-wrap">
+  <div class="table-scroll">
+  <table class="jobs-table">
+    <thead>
+      <tr>
+        <th>Company / Role</th>
+        <th>ATS Match</th>
+        <th>Files</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pack in extra_packs %}
+      <tr>
+        <td>
+          <div class="company-name">{{ pack.company }}</div>
+          <div class="role-name">{{ pack.role }}</div>
+        </td>
+        <td>
+          {% if pack.ats_score is not none %}
+            <div class="ats-bar-wrap">
+              <div class="ats-bar">
+                <div class="ats-bar-fill" style="width:{{ pack.ats_score }}%;background:{% if pack.ats_score >= 80 %}var(--green){% elif pack.ats_score >= 60 %}var(--yellow){% else %}var(--red){% endif %}"></div>
+              </div>
+              <span class="ats-pct" style="color:{% if pack.ats_score >= 80 %}var(--green){% elif pack.ats_score >= 60 %}var(--yellow){% else %}var(--red){% endif %}">{{ pack.ats_score }}%</span>
+            </div>
+          {% else %}
+            <span style="color:var(--text2);font-size:12px">N/A</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if 'cv.pdf' in pack.pack_files %}
+            <a href="/download/{{ pack.pack_slug }}/cv.pdf" class="btn btn-download btn-sm">CV</a>
+          {% endif %}
+          {% if 'cover_letter.pdf' in pack.pack_files %}
+            <a href="/download/{{ pack.pack_slug }}/cover_letter.pdf" class="btn btn-download btn-sm" style="margin-left:4px">Letter</a>
+          {% endif %}
+        </td>
+        <td>
+          {% if pack.job_link %}
+            <a href="{{ pack.job_link }}" target="_blank" class="btn btn-apply btn-sm">Apply &rarr;</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+function toggleDetail(id, btn) {
+  const row = document.getElementById('detail-' + id);
+  const isOpen = row.classList.contains('show');
+  // Close all
+  document.querySelectorAll('.detail-row.show').forEach(r => r.classList.remove('show'));
+  document.querySelectorAll('.expand-btn.open').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.job-row').forEach(r => r.classList.remove('expanded'));
+  if (!isOpen) {
+    row.classList.add('show');
+    btn.classList.add('open');
+    btn.closest('tr').classList.add('expanded');
+  }
+}
+
+function filterJobs(filter) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  document.querySelectorAll('.job-row').forEach(row => {
+    const status = row.dataset.status;
+    const workauth = row.dataset.workauth;
+    const source = row.dataset.source;
+    let show = true;
+
+    if (filter === 'pack_generated') show = status === 'pack_generated';
+    else if (filter === 'not_applied') show = status === 'not_applied';
+    else if (filter === 'applied') show = ['applied','interview','assessment','offer'].includes(status);
+    else if (filter === 'confirmed') show = workauth === 'confirmed';
+    else if (filter === 'career_pages') show = source === 'career_page';
+    else if (filter === 'indeed') show = source === 'indeed';
+    else if (filter === 'linkedin') show = source === 'linkedin';
+
+    row.style.display = show ? '' : 'none';
+    // Also hide detail rows
+    const id = row.querySelector('.expand-btn')?.onclick?.toString().match(/\d+/)?.[0];
+    if (id) document.getElementById('detail-' + id).style.display = show ? '' : 'none';
+  });
+}
+
+function searchJobs(query) {
+  query = query.toLowerCase();
+  document.querySelectorAll('.job-row').forEach(row => {
+    const company = row.dataset.company;
+    const role = row.dataset.role;
+    const show = !query || company.includes(query) || role.includes(query);
+    row.style.display = show ? '' : 'none';
+  });
+}
+
+function updateStatus(id, status) {
+  fetch('/api/update-status', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, status })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      showToast('Status updated: ' + status.replace('_', ' '));
+      // Update the data attribute for filtering
+      const rows = document.querySelectorAll('.job-row');
+      if (rows[id]) rows[id].dataset.status = status;
+    }
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+
+</body>
+</html>
