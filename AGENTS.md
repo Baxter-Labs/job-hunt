@@ -73,6 +73,7 @@ files are the source of truth**, not this table.
 | Interview prep | reads `cv_master.json` + JD via `tailor.tailor_engine` helpers; minimal Python, mostly generative | `plugins/job-hunt/skills/interview-prep/SKILL.md` |
 | Follow-up email draft | `python -m insights.insights_cli followup-context --company "<C>" --role "<R>"` | `plugins/job-hunt/skills/job-followup/SKILL.md` |
 | Fit score (CV vs JD) | `python -m scoring.scoring_cli fit --jd-text "<JD>"` (or `--jd-file`) | `plugins/job-hunt/skills/job-fit/SKILL.md` |
+| Readiness score (pack pre-apply) | `python -m scoring.scoring_cli readiness --pack "<slug>"` (JD from the pack, or `--jd-text`/`--jd-file`) | `plugins/job-hunt/skills/job-readiness/SKILL.md` |
 
 **How to use this table:** for any capability, open the matching
 `plugins/job-hunt/skills/<name>/SKILL.md` and follow it step by step. It
@@ -90,9 +91,9 @@ environment — never fake a result to paper over a missing tool.
 
 **Works everywhere, needs only Python** (no MCP, no browser):
 `job-setup`, `cv-tailor`/`/job-tailor` (fabrication-checked CV + ATS score),
-`job-upskill`, `job-redflag`, `job-followup`, `job-fit`, `interview-prep`,
-`job-track` (text summary; the Flask dashboard also needs only local
-Python/Flask).
+`job-upskill`, `job-redflag`, `job-followup`, `job-fit`, `job-readiness`,
+`interview-prep`, `job-track` (text summary; the Flask dashboard also needs
+only local Python/Flask).
 
 **Needs external tools configured in the host agent:**
 `job-search` and `job-apply` require live access to job platforms

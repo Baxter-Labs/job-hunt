@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   (0.3), and seniority alignment (0.2) with documented weights; reports honest
   reasons and routes low fits to `/job-upskill` rather than padding the CV.
   Golden-eval'd under `evals/golden/fit/` and gated in `tests/test_evals.py`.
+- Added `/job-readiness` (Phase A of the "Land It" suite): a deterministic, offline
+  0–100 readiness score for a tailored application pack, in `scripts/scoring/readiness.py`
+  plus a `readiness` subcommand on `scoring_cli`. Blends ATS match (0.35), fit (0.25,
+  Phase C), completeness (0.25), and advisory red flags (0.15), with a HARD fabrication
+  gate that caps a fabricated pack at 0 and marks it blocking. Honest suggestions surface
+  skills you already have but omitted (re-tailor) and route genuine gaps to `/job-upskill`,
+  never fabricating. Writes `readiness.json` into the pack. Golden-eval'd under
+  `evals/golden/readiness/` and gated in `tests/test_evals.py`.
 - Added cross-platform usage docs so the plugin can be used from any AI
   coding agent, not just Claude Code: `AGENTS.md` (setup, workspace model,
   command catalog for Codex CLI / opencode / any shell-capable agent),

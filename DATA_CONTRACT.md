@@ -163,6 +163,21 @@ inserting an unearned keyword.
 
 ---
 
+## `readiness.json` (written into a pack by `/job-readiness`)
+
+| Field | Type | Meaning |
+|---|---|---|
+| `readiness_score` | integer 0–100 | Blended score; 0 when `blocking` is true. |
+| `blocking` | boolean | True iff the pack's fabrication check failed — not ready to send. |
+| `factors` | array | `{name, status (pass|warn|fail), detail}` per factor: Fabrication check, ATS match, Fit, Completeness, Red flags (job-side, advisory). |
+| `suggestions` | array of strings | Honest next steps: "re-tailor to surface" (skills you have), "Learn-gap … /job-upskill" (genuine gaps, never added), and missing-pack fixes. |
+
+Weights: ATS 0.35, Fit 0.25, Completeness 0.25, Red flags 0.15 (advisory, weighted
+lightest). Fabrication is a hard gate: `fabrication_check.passed == false` in the pack's
+`tailored_cv.json` forces `blocking=true` and `readiness_score=0`.
+
+---
+
 ## `tracker.csv`
 
 Read/written by `plugins/job-hunt/scripts/search/tracker.py`. Fixed column
