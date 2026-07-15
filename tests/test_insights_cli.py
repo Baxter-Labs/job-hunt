@@ -94,6 +94,14 @@ def test_upskill_all_no_packs(tmp_path):
     assert out["ok"] is True and out["packs_scanned"] == 0 and out["gaps"] == []
 
 
+def test_upskill_no_args_returns_json_exit1(tmp_path):
+    home = tmp_path / "ws"; home.mkdir()
+    proc = _run(["upskill"], home)  # no --pack/--all
+    assert proc.returncode == 1
+    out = json.loads(proc.stdout)
+    assert out["ok"] is False and "error" in out
+
+
 # --- followup-context ---
 
 def test_followup_context(tmp_path):
@@ -122,3 +130,11 @@ def test_followup_context_unknown(tmp_path):
     out = json.loads(proc.stdout)
     assert out["ok"] is True
     assert out["status"] == "" and out["has_pack"] is False and out["ats_score"] is None
+
+
+def test_followup_context_missing_args_returns_json_exit1(tmp_path):
+    home = tmp_path / "ws"; home.mkdir()
+    proc = _run(["followup-context", "--company", "Acme"], home)  # missing --role
+    assert proc.returncode == 1
+    out = json.loads(proc.stdout)
+    assert out["ok"] is False and "error" in out

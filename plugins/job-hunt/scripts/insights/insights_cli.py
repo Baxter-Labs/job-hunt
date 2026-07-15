@@ -42,6 +42,8 @@ def cmd_red_flags(args: argparse.Namespace) -> int:
 
 def cmd_upskill(args: argparse.Namespace) -> int:
     output_root = Path(args.output_root) if args.output_root else None
+    if args.all and args.pack:
+        raise ValueError("Provide exactly one of --pack <slug> or --all, not both.")
     if args.all:
         pack_dirs = upskill.iter_pack_dirs(output_root)
     elif args.pack:
@@ -54,6 +56,8 @@ def cmd_upskill(args: argparse.Namespace) -> int:
 
 
 def cmd_followup_context(args: argparse.Namespace) -> int:
+    if not args.company or not args.role:
+        raise ValueError("Both --company and --role are required.")
     output_root = Path(args.output_root) if args.output_root else None
     ctx = followup.application_context(args.company, args.role, output_root=output_root)
     ctx["ok"] = True
@@ -76,15 +80,21 @@ def build_parser() -> argparse.ArgumentParser:
     rf.set_defaults(func=cmd_red_flags)
 
     up = sub.add_parser("upskill", help="Rank missing-keyword gaps across packs.")
-    mode = up.add_mutually_exclusive_group(required=True)
+    # NOT required at the argparse level, matching red-flags: missing/conflicting
+    # --pack/--all must fall through to cmd_upskill's own ValueError -> JSON
+    # {"ok": false, ...} + exit 1, not argparse's exit(2)/usage-text error.
+    mode = up.add_mutually_exclusive_group(required=False)
     mode.add_argument("--pack", default=None, help="A single pack slug or dir.")
     mode.add_argument("--all", action="store_true", help="All packs in the workspace.")
     up.add_argument("--output-root", default=None, help="Override the output root (tests).")
     up.set_defaults(func=cmd_upskill)
 
     fu = sub.add_parser("followup-context", help="Assemble one application's context.")
-    fu.add_argument("--company", required=True)
-    fu.add_argument("--role", required=True)
+    # NOT required at the argparse level, matching red-flags: a missing --company
+    # or --role must fall through to cmd_followup_context's own ValueError ->
+    # JSON {"ok": false, ...} + exit 1, not argparse's exit(2)/usage-text error.
+    fu.add_argument("--company", required=False, default=None)
+    fu.add_argument("--role", required=False, default=None)
     fu.add_argument("--output-root", default=None, help="Override the output root (tests).")
     fu.set_defaults(func=cmd_followup_context)
 

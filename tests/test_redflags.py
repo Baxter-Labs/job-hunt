@@ -139,3 +139,82 @@ def test_deterministic_order_and_repeatable():
     # order follows detector declaration order (compensation-vague appears before pto)
     flags_in_order = [f["flag"] for f in a]
     assert flags_in_order == sorted(flags_in_order, key=flags_in_order.index)  # stable
+
+
+# --- Issue 1: family-culture must not fire on GOOD family benefits ---
+def test_family_leave_benefit_not_flagged():
+    flags = {f["flag"] for f in rf.scan_red_flags(
+        "Great benefits including family leave and parental leave.")}
+    assert "family-culture" not in flags
+
+
+def test_family_of_products_not_flagged():
+    flags = {f["flag"] for f in rf.scan_red_flags(
+        "You will help grow our family of products.")}
+    assert "family-culture" not in flags
+
+
+def test_genuine_family_culture_still_flagged():
+    flags = {f["flag"] for f in rf.scan_red_flags(
+        "We're like a family here and everyone pitches in after hours.")}
+    assert "family-culture" in flags
+
+
+# --- Issue 2: equity-only must not fire when salary is ALSO offered ---
+def test_equity_plus_salary_not_flagged():
+    flags = {f["flag"] for f in rf.scan_red_flags(
+        "We offer not only equity but also a competitive base salary of 90,000 EUR.")}
+    assert "equity-only-comp" not in flags
+
+
+def test_genuine_equity_only_still_flagged():
+    flags = {f["flag"] for f in rf.scan_red_flags(
+        "Compensation is equity only for the first year.")}
+    assert "equity-only-comp" in flags
+
+
+# --- Issue 3: entry-level-senior-demand must key off EXPERIENCE, not any year mention ---
+def test_junior_with_combined_years_not_flagged():
+    flags = {f["flag"] for f in rf.scan_red_flags(
+        "Junior Engineer. Join a team with 20 years of combined experience.")}
+    assert "entry-level-senior-demand" not in flags
+
+
+def test_graduate_company_age_not_flagged():
+    flags = {f["flag"] for f in rf.scan_red_flags(
+        "Graduate role at a company founded 8 years ago.")}
+    assert "entry-level-senior-demand" not in flags
+
+
+def test_genuine_entry_level_senior_demand_still_flagged():
+    flags = {f["flag"] for f in rf.scan_red_flags(
+        "Entry-level position. Requires 7+ years of experience with distributed systems.")}
+    assert "entry-level-senior-demand" in flags
+
+
+# --- Issue 4: on-call flag must respect negation ---
+def test_no_oncall_not_flagged():
+    for t in ("This role has no on-call duties.",
+              "On-call support is not required for this position."):
+        flags = {f["flag"] for f in rf.scan_red_flags(t)}
+        assert "on-call-uncompensated" not in flags, t
+
+
+def test_genuine_uncompensated_oncall_still_flagged():
+    flags = {f["flag"] for f in rf.scan_red_flags(
+        "You will join an on-call rotation covering nights and weekends.")}
+    assert "on-call-uncompensated" in flags
+
+
+# --- Issue 5 (minor): rockstar-language must not hit tooling/UI terms ---
+def test_ninja_buildsystem_and_wizard_not_flagged():
+    for t in ("We use the Ninja build system for fast builds.",
+              "Users complete an onboarding wizard on first login."):
+        flags = {f["flag"] for f in rf.scan_red_flags(t)}
+        assert "rockstar-language" not in flags, t
+
+
+def test_genuine_rockstar_language_still_flagged():
+    flags = {f["flag"] for f in rf.scan_red_flags(
+        "We're looking for a coding rockstar / ninja to join the team.")}
+    assert "rockstar-language" in flags

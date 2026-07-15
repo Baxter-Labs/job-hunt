@@ -48,6 +48,15 @@ _ONCALL_COMP_RE = re.compile(
     r"|on[-\s]?call[^.]{0,30}?(?:is\s+)?(?:paid|compensat\w*)",
     re.IGNORECASE,
 )
+# A negated on-call mention ("no on-call", "on-call ... not required", "without
+# on-call") is not a red flag at all -- there is no uncompensated rotation to
+# warn about.
+_ONCALL_NEGATED_RE = re.compile(
+    r"\bno\s+on[-\s]?call\b"
+    r"|\bwithout\s+on[-\s]?call\b"
+    r"|on[-\s]?call[^.]{0,30}?\bnot\s+required\b",
+    re.IGNORECASE,
+)
 
 # --- unpaid assessment ------------------------------------------------------
 _ASSESS = r"(?:take[-\s]?home\s+)?(?:assignment|assessment|task|test|project|trial|challenge|case\s+study|exercise)"
@@ -57,8 +66,10 @@ _UNPAID_RE = re.compile(
 )
 
 # --- equity-only ------------------------------------------------------------
+# "only equity" must not match when it's actually "not only equity" (i.e. equity
+# plus something else, such as "not only equity but also a salary").
 _EQUITY_ONLY_RE = re.compile(
-    r"equity[-\s]?only|only\s+equity|sweat\s+equity|equity\s+in\s+lieu"
+    r"equity[-\s]?only|(?<!not\s)only\s+equity|sweat\s+equity|equity\s+in\s+lieu"
     r"|compensation\s+is\s+(?:mainly\s+|primarily\s+)?equity",
     re.IGNORECASE,
 )
@@ -69,7 +80,17 @@ _MANY_HATS_RE = re.compile(
     r"\bwear(?:s|ing)?\s+(?:many|multiple|several|lots\s+of|a\s+lot\s+of)\s+hats\b",
     re.IGNORECASE,
 )
-_ROCKSTAR_RE = re.compile(r"\b(?:rock\s?stars?|ninjas?|gurus?|superstars?|wizards?)\b", re.IGNORECASE)
+# "rockstar"/"guru"/"superstar" are unambiguous culture-cliche words for a
+# person on their own. "ninja"/"wizard" are also common *tooling/UI* nouns
+# (Ninja build system, ONNX Runtime, setup wizard) so they only count as the
+# red flag when used with person/role context.
+_ROCKSTAR_RE = re.compile(
+    r"\b(?:rock\s?stars?|gurus?|superstars?)\b"
+    r"|\b(?:coding|code)\s+ninjas?\b"
+    r"|\bninjas?\s+(?:developer|engineer|coder|dev)s?\b"
+    r"|\bwizards?\s+(?:developer|engineer|coder|dev)s?\b",
+    re.IGNORECASE,
+)
 _UNLIMITED_PTO_RE = re.compile(
     r"\bunlimited\s+(?:pto|vacation|holidays?|time[-\s]?off|leave|paid\s+time\s+off)\b",
     re.IGNORECASE,
@@ -90,7 +111,11 @@ _YEARS_RANGE_RE = re.compile(
 _ENTRY_RE = re.compile(
     r"\b(?:junior|entry[-\s]?level|new\s+grad|graduate|intern(?:ship)?)\b", re.IGNORECASE
 )
-_HIGH_YEARS_RE = re.compile(r"\b(\d{1,2})\s*\+?\s*years?\b", re.IGNORECASE)
+# Must be a years-of-EXPERIENCE demand, not any mention of a year count (team's
+# combined experience, years since the company was founded, etc.).
+_HIGH_YEARS_RE = re.compile(
+    r"\b(\d{1,2})\s*\+?\s*years?(?:\s+of)?\s+(?:experience|exp)\b", re.IGNORECASE
+)
 
 _EXPERIENCE_RANGE_SPAN = 6   # a >=6-year advertised range is implausibly wide
 _ENTRY_SENIOR_YEARS = 5      # >=5 years demanded of an "entry"/"junior" role
@@ -114,7 +139,7 @@ def _detect_vague_compensation(text: str) -> list[dict]:
 
 def _detect_oncall(text: str) -> list[dict]:
     m = _ONCALL_RE.search(text)
-    if m and not _ONCALL_COMP_RE.search(text):
+    if m and not _ONCALL_COMP_RE.search(text) and not _ONCALL_NEGATED_RE.search(text):
         return [_finding("on-call-uncompensated", "compensation", "medium", m)]
     return []
 
