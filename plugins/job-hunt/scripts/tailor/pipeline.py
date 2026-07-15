@@ -74,6 +74,10 @@ def slugify(value: str) -> str:
 
     ``'Booking.com' -> 'booking-com'``. Used for the pack folder name. Returns
     ``'untitled'`` when the input slugs to nothing (e.g. only punctuation).
+
+    SHARED PACK-SLUG CONTRACT: must stay byte-for-byte identical to
+    ``search.listing.slugify`` — search dedupe and tailor output rely on the same
+    ``<company>-<role>`` folder name. Change both together, or consolidate.
     """
     text = (value or "").strip().lower()
     text = re.sub(r"[^a-z0-9]+", "-", text)

@@ -777,6 +777,10 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
+# NOTE: this module-level CLI (and the live `call_claude` path it can reach) is a
+# DEV-ONLY standalone tailoring tool that needs `pip install anthropic`. The
+# /job-tailor SKILL does NOT use it — Claude authors tailored_cv.json in the skill
+# and `tailor_cli finalize` validates/renders/scores it. Tests use `--mock`.
 def main(argv: Optional[list[str]] = None) -> int:
     args = _build_arg_parser().parse_args(argv)
     mock = args.mock or args.dry_run

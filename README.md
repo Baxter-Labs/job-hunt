@@ -10,6 +10,17 @@ The plugin ships as five slash commands that share one workspace and one
 engine: `/job-setup` → `/job-search` → `/job-tailor` → `/job-apply` →
 `/job-track`.
 
+## Dashboard preview
+
+The optional `/job-track dashboard` gives you a local web view of every
+application — work-authorisation status, **ATS match score**, the generated CV /
+cover-letter files, and quick apply links:
+
+![Job Hunt dashboard — application tracker showing ATS match scores, work-auth status, and generated packs](docs/img/dashboard.png)
+
+_(Sample data shown; the dashboard runs locally on `127.0.0.1` and reads only
+your own workspace.)_
+
 ## Install
 
 ```
