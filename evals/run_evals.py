@@ -22,6 +22,7 @@ import loader  # noqa: E402
 import ats_eval  # noqa: E402
 import rank_eval  # noqa: E402
 import fit_eval  # noqa: E402
+import readiness_eval  # noqa: E402
 
 
 def collect_results() -> list[dict]:
@@ -32,6 +33,8 @@ def collect_results() -> list[dict]:
         results.append(rank_eval.evaluate_rank_case(case))
     for case in loader.load_fit_cases():
         results.append(fit_eval.evaluate_fit_case(case))
+    for case in loader.load_readiness_cases():
+        results.append(readiness_eval.evaluate_readiness_case(case))
     return results
 
 
@@ -45,6 +48,8 @@ def format_scorecard(results: list[dict]) -> str:
             detail = f"score={res['score']}"
         elif res["kind"] == "fit":
             detail = f"fit={res['score']}"
+        elif res["kind"] == "readiness":
+            detail = f"readiness={res['score']}"
         else:
             detail = f"order={res['order']}"
         lines.append(f"[{status}] {res['kind']:4} {res['id']:28} {detail}")

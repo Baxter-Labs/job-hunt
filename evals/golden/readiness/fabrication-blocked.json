@@ -1,0 +1,28 @@
+{
+  "id": "fabrication-blocked", "synthetic": true,
+  "jd": "Backend Engineer. Python, SQL and Docker required.",
+  "master": {
+    "summary": "Backend engineer building Python services.",
+    "skills": [{"name": "Python"}, {"name": "SQL"}],
+    "experience": [{"company": "Northwind BV", "title": "Backend Engineer",
+                    "dates": "Jan 2020 – Dec 2024",
+                    "bullets": ["Built Python and SQL services."]}]
+  },
+  "pack": {
+    "ats_report": {"match_score": 95, "total_keywords": 5, "matched_count": 5,
+                   "matched_keywords": ["python", "sql", "docker"], "missing_keywords": []},
+    "tailored_cv": {
+      "contact": {"name": "Ada Placeholder", "email": "provided"},
+      "summary": "Backend engineer.",
+      "skills_grouped": [{"group": "Core", "skills": ["Python", "SQL", "Docker"]}],
+      "experience": [{"title": "Backend Engineer", "bullets": ["Built Python services."]}],
+      "highlights": [], "ats_keywords_used": [],
+      "fabrication_check": {"passed": false, "issues": ["skill 'Docker' is not a master skill"]}
+    },
+    "files": ["cv.pdf", "cover_letter.pdf"]
+  },
+  "expect": {
+    "readiness_score_min": 0, "readiness_score_max": 0,
+    "blocking": true
+  }
+}

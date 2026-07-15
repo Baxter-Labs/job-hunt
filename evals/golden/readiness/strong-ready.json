@@ -1,0 +1,32 @@
+{
+  "id": "strong-ready", "synthetic": true,
+  "jd": "Senior Backend Engineer. Python, SQL, Docker, Kubernetes, REST APIs and AWS. Run microservices in production.",
+  "master": {
+    "summary": "Senior backend engineer building Python microservices on AWS.",
+    "skills": [{"name": "Python"}, {"name": "SQL"}, {"name": "Docker"},
+               {"name": "Kubernetes"}, {"name": "AWS"}, {"name": "REST"}],
+    "experience": [{"company": "Northwind BV", "title": "Senior Backend Engineer",
+                    "dates": "Jan 2019 – Dec 2024",
+                    "bullets": ["Built Python microservices with Docker and Kubernetes.",
+                                "Designed REST APIs deployed on AWS."]}]
+  },
+  "pack": {
+    "ats_report": {"match_score": 90, "total_keywords": 10, "matched_count": 9,
+                   "matched_keywords": ["python", "sql", "docker", "kubernetes", "aws", "rest"],
+                   "missing_keywords": ["terraform"]},
+    "tailored_cv": {
+      "contact": {"name": "Ada Placeholder", "email": "provided"},
+      "summary": "Senior backend engineer.",
+      "skills_grouped": [{"group": "Core", "skills": ["Python", "SQL", "Docker", "Kubernetes", "AWS", "REST"]}],
+      "experience": [{"title": "Senior Backend Engineer",
+                      "bullets": ["Built Python microservices with Docker, Kubernetes, REST and AWS."]}],
+      "highlights": [], "ats_keywords_used": [],
+      "fabrication_check": {"passed": true, "issues": []}
+    },
+    "files": ["cv.pdf", "cover_letter.pdf"]
+  },
+  "expect": {
+    "readiness_score_min": 85, "readiness_score_max": 95,
+    "blocking": false
+  }
+}

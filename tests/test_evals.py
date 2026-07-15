@@ -18,6 +18,7 @@ def test_golden_dirs_exist():
     assert loader.ATS_DIR.is_dir()
     assert loader.RANK_DIR.is_dir()
     assert loader.FIT_DIR.is_dir()
+    assert loader.READINESS_DIR.is_dir()
 
 
 def test_validate_ats_case_accepts_well_formed(tmp_path):
@@ -85,6 +86,16 @@ def test_validate_fit_case_rejects_missing_master():
            "expect": {"fit_score_min": 0, "fit_score_max": 100}}
     try:
         loader.validate_fit_case(bad, "f.json")
+        assert False, "expected CaseError"
+    except loader.CaseError as e:
+        assert "master" in str(e)
+
+
+def test_validate_readiness_case_rejects_missing_master():
+    bad = {"id": "r", "synthetic": True, "jd": "x",
+           "expect": {"readiness_score_min": 0, "readiness_score_max": 100}}
+    try:
+        loader.validate_readiness_case(bad, "r.json")
         assert False, "expected CaseError"
     except loader.CaseError as e:
         assert "master" in str(e)
@@ -199,6 +210,7 @@ def test_evaluate_rank_case_flags_wrong_order():
 
 
 import fit_eval  # noqa: E402
+import readiness_eval  # noqa: E402
 import re  # noqa: E402  (json already imported at top)
 import run_evals  # noqa: E402
 
@@ -224,8 +236,15 @@ def test_all_fit_golden_cases_pass():
         assert res["passed"], f"{res['source']}: {res['failures']}"
 
 
+def test_all_readiness_golden_cases_pass():
+    for case in loader.load_readiness_cases():
+        res = readiness_eval.evaluate_readiness_case(case)
+        assert res["passed"], f"{res['source']}: {res['failures']}"
+
+
 def test_golden_cases_are_synthetic_and_have_no_personal_data():
-    files = loader.iter_ats_files() + loader.iter_rank_files() + loader.iter_fit_files()
+    files = (loader.iter_ats_files() + loader.iter_rank_files()
+             + loader.iter_fit_files() + loader.iter_readiness_files())
     assert files, "expected golden cases to exist"
     for path in files:
         raw = path.read_text(encoding="utf-8")
@@ -245,8 +264,8 @@ def test_scorecard_reports_every_case():
     results = run_evals.collect_results()
     text = run_evals.format_scorecard(results)
     assert "PASS" in text
-    # 8 ATS + 3 rank + N fit cases accounted for.
-    expected_total = 8 + 3 + len(loader.iter_fit_files())
+    # 8 ATS + 3 rank + N fit + N readiness cases accounted for.
+    expected_total = 8 + 3 + len(loader.iter_fit_files()) + len(loader.iter_readiness_files())
     assert len(results) == expected_total
     for res in results:
         assert res["id"] in text

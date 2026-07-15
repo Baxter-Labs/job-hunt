@@ -16,10 +16,12 @@ GOLDEN_DIR = Path(__file__).resolve().parent / "golden"
 ATS_DIR = GOLDEN_DIR / "ats"
 RANK_DIR = GOLDEN_DIR / "rank"
 FIT_DIR = GOLDEN_DIR / "fit"
+READINESS_DIR = GOLDEN_DIR / "readiness"
 
 ATS_EXPECT_KEYS = frozenset({"score_min", "score_max", "must_match", "must_miss"})
 RANK_EXPECT_KEYS = frozenset({"order"})
 FIT_EXPECT_KEYS = frozenset({"fit_score_min", "fit_score_max"})
+READINESS_EXPECT_KEYS = frozenset({"readiness_score_min", "readiness_score_max"})
 
 
 class CaseError(Exception):
@@ -120,6 +122,39 @@ def validate_fit_case(case: dict[str, Any], source: str) -> None:
              source, "expect.must_include_reason must be a list of strings")
 
 
+def validate_readiness_case(case: dict[str, Any], source: str) -> None:
+    _validate_common(case, source)
+    _require(isinstance(case.get("jd"), str) and case["jd"].strip() != "",
+             source, "missing non-empty string 'jd'")
+    _require(isinstance(case.get("master"), dict),
+             source, "missing 'master' object (a synthetic cv_master fragment)")
+    pack = case.get("pack", {})
+    _require(isinstance(pack, dict), source, "'pack' must be an object when present")
+    if "ats_report" in pack:
+        _require(isinstance(pack["ats_report"], dict), source, "pack.ats_report must be an object")
+    if "tailored_cv" in pack:
+        _require(isinstance(pack["tailored_cv"], dict), source, "pack.tailored_cv must be an object")
+    if "files" in pack:
+        _require(isinstance(pack["files"], list) and all(isinstance(x, str) for x in pack["files"]),
+                 source, "pack.files must be a list of strings")
+    expect = case.get("expect")
+    _require(isinstance(expect, dict), source, "missing 'expect' object")
+    missing = READINESS_EXPECT_KEYS - set(expect)
+    _require(not missing, source, f"expect missing key(s): {sorted(missing)}")
+    for k in ("readiness_score_min", "readiness_score_max"):
+        _require(isinstance(expect[k], int), source, f"expect.{k} must be an int")
+    _require(expect["readiness_score_min"] <= expect["readiness_score_max"],
+             source, "expect.readiness_score_min must be <= expect.readiness_score_max")
+    if "blocking" in expect:
+        _require(isinstance(expect["blocking"], bool), source, "expect.blocking must be a bool")
+    reasons = expect.get("must_include_suggestion", [])
+    _require(isinstance(reasons, list) and all(isinstance(x, str) for x in reasons),
+             source, "expect.must_include_suggestion must be a list of strings")
+    absent = expect.get("must_not_suggest", [])
+    _require(isinstance(absent, list) and all(isinstance(x, str) for x in absent),
+             source, "expect.must_not_suggest must be a list of strings")
+
+
 def iter_ats_files() -> list[Path]:
     return sorted(ATS_DIR.glob("*.json"))
 
@@ -157,6 +192,20 @@ def load_fit_cases() -> list[dict[str, Any]]:
     for path in iter_fit_files():
         case = load_json(path)
         validate_fit_case(case, path.name)
+        case["_source"] = path.name
+        cases.append(case)
+    return cases
+
+
+def iter_readiness_files() -> list[Path]:
+    return sorted(READINESS_DIR.glob("*.json"))
+
+
+def load_readiness_cases() -> list[dict[str, Any]]:
+    cases: list[dict[str, Any]] = []
+    for path in iter_readiness_files():
+        case = load_json(path)
+        validate_readiness_case(case, path.name)
         case["_source"] = path.name
         cases.append(case)
     return cases

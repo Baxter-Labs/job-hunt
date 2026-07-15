@@ -1,0 +1,30 @@
+{
+  "id": "weak-learn-gap", "synthetic": true,
+  "jd": "Backend Engineer. Python, SQL and Rust required.",
+  "master": {
+    "summary": "Backend engineer building Python services.",
+    "skills": [{"name": "Python"}, {"name": "SQL"}],
+    "experience": [{"company": "Northwind BV", "title": "Backend Engineer",
+                    "dates": "Jan 2021 – Dec 2024",
+                    "bullets": ["Built Python and SQL services."]}]
+  },
+  "pack": {
+    "ats_report": {"match_score": 55, "total_keywords": 3, "matched_count": 2,
+                   "matched_keywords": ["python", "sql"], "missing_keywords": ["rust"]},
+    "tailored_cv": {
+      "contact": {"name": "Ada Placeholder", "email": "provided"},
+      "summary": "Backend engineer.",
+      "skills_grouped": [{"group": "Core", "skills": ["Python", "SQL"]}],
+      "experience": [{"title": "Backend Engineer", "bullets": ["Built Python and SQL services."]}],
+      "highlights": [], "ats_keywords_used": [],
+      "fabrication_check": {"passed": true, "issues": []}
+    },
+    "files": ["cv.pdf"]
+  },
+  "expect": {
+    "readiness_score_min": 61, "readiness_score_max": 71,
+    "blocking": false,
+    "must_include_suggestion": ["Learn-gap", "rust", "/job-upskill", "cover letter"],
+    "must_not_suggest": ["Re-tailor to surface: rust"]
+  }
+}
