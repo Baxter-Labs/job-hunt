@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Added a deterministic quality-evals harness (`evals/`): domain-diverse golden
+  cases for ATS scoring and listing ranking, a scorecard CLI
+  (`evals/run_evals.py`), and a `pytest` gate (`tests/test_evals.py`) with
+  regression guards for the trailing-punctuation and score-honesty bugs. Dev
+  tooling only — no user-facing command changes.
+
 ## [0.1.0] - 2026-07-15
 
 Initial release. Five slash commands sharing one workspace and one

@@ -189,3 +189,16 @@ registry you plug into.
 - [CONTRIBUTING.md](CONTRIBUTING.md) — how to set up a dev environment, run
   the test suite, and the repository's conventions.
 - [CHANGELOG.md](CHANGELOG.md) — release history.
+
+### Quality evals
+
+Beyond unit tests, `evals/` holds a deterministic, offline **quality-evals
+harness**: domain-diverse golden cases (JSON) that lock the exact/banded
+behavior of the ATS scorer and the listing ranker, including regression guards
+for two bugs the unit tests once missed (trailing-punctuation keyword fragments
+and counting non-rendered keywords). Run the scorecard:
+
+    .venv/bin/python evals/run_evals.py
+
+It also runs as part of `pytest` via `tests/test_evals.py`. See
+`evals/README.md` for the case schema and how to add a case.
