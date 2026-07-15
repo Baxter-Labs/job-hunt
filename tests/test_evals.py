@@ -185,3 +185,49 @@ def test_evaluate_rank_case_flags_wrong_order():
     res = rank_eval.evaluate_rank_case(case)
     assert res["passed"] is False
     assert res["failures"]
+
+
+import re  # noqa: E402  (json already imported at top)
+import run_evals  # noqa: E402
+
+_EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+_PII_DENYLIST = ("eshwar", "eshwarpkofficial")
+
+
+def test_all_ats_golden_cases_pass():
+    for case in loader.load_ats_cases():
+        res = ats_eval.evaluate_ats_case(case)
+        assert res["passed"], f"{res['source']}: {res['failures']}"
+
+
+def test_all_rank_golden_cases_pass():
+    for case in loader.load_rank_cases():
+        res = rank_eval.evaluate_rank_case(case)
+        assert res["passed"], f"{res['source']}: {res['failures']}"
+
+
+def test_golden_cases_are_synthetic_and_have_no_personal_data():
+    files = loader.iter_ats_files() + loader.iter_rank_files()
+    assert files, "expected golden cases to exist"
+    for path in files:
+        raw = path.read_text(encoding="utf-8")
+        case = json.loads(raw)
+        assert case.get("synthetic") is True, f"{path.name}: not marked synthetic"
+        assert not _EMAIL_RE.search(raw), f"{path.name}: contains an email address"
+        low = raw.lower()
+        for token in _PII_DENYLIST:
+            assert token not in low, f"{path.name}: contains personal identifier {token!r}"
+
+
+def test_run_evals_returns_zero_when_all_pass():
+    assert run_evals.run() == 0
+
+
+def test_scorecard_reports_every_case():
+    results = run_evals.collect_results()
+    text = run_evals.format_scorecard(results)
+    assert "PASS" in text
+    # 8 ATS + 3 rank = 11 cases accounted for.
+    assert len(results) == 11
+    for res in results:
+        assert res["id"] in text
