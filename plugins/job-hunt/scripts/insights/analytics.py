@@ -121,24 +121,40 @@ def _takeaways(by_source: dict, by_band: dict, min_n: int) -> list[str]:
     out: list[str] = []
 
     # ATS band: 70+ vs <50 response rate, only when both bands have enough data.
+    # The directive must follow whichever band actually converts better — never
+    # recommend chasing a higher ATS score when the data shows the opposite.
     hi = by_band.get("70+")
     lo = by_band.get("<50")
     if hi and lo and hi["applied"] >= min_n and lo["applied"] >= min_n:
-        out.append(
-            f"70+ ATS band: {_pct(hi['response_rate'])}% response vs "
-            f"{_pct(lo['response_rate'])}% for <50 — prioritise higher-scoring tailors."
+        hi_rate, lo_rate = hi["response_rate"], lo["response_rate"]
+        msg = (
+            f"70+ ATS band: {_pct(hi_rate)}% response vs "
+            f"{_pct(lo_rate)}% for <50 applications."
         )
+        if hi_rate > lo_rate:
+            msg += " Prioritise higher-scoring tailors."
+        elif lo_rate > hi_rate:
+            msg += (
+                " Higher ATS isn't converting better here — keep tailoring "
+                "honestly and watch the trend as your sample grows."
+            )
+        else:
+            msg += " They're converting about the same so far."
+        out.append(msg)
 
-    # Best-converting source, only among sources with enough applications.
+    # Best-converting source, only among sources with enough applications, and
+    # only when the top source strictly beats the runner-up (never on a tie).
     eligible = {k: v for k, v in by_source.items() if v["applied"] >= min_n}
     if len(eligible) >= 2:
-        best = max(eligible.items(),
-                   key=lambda kv: (kv[1]["response_rate"], kv[1]["applied"]))
-        name, f = best
-        out.append(
-            f"{name}: highest response rate at {_pct(f['response_rate'])}% "
-            f"across {f['applied']} applications — send more there."
-        )
+        ranked = sorted(eligible.items(),
+                         key=lambda kv: (kv[1]["response_rate"], kv[1]["applied"]),
+                         reverse=True)
+        (name, f), (_, runner_up) = ranked[0], ranked[1]
+        if f["response_rate"] > runner_up["response_rate"]:
+            out.append(
+                f"{name}: highest response rate at {_pct(f['response_rate'])}% "
+                f"across {f['applied']} applications — send more there."
+            )
 
     return out
 
@@ -190,6 +206,6 @@ def workspace_pack_lookup(output_root: Optional[Path] = None) -> PackLookup:
         if not report:
             return None
         score = report.get("match_score")
-        return score if isinstance(score, int) else None
+        return score if isinstance(score, (int, float)) and not isinstance(score, bool) else None
 
     return lookup

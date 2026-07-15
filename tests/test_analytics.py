@@ -108,3 +108,43 @@ def test_big_enough_sample_emits_ats_band_takeaway():
         scores[(f"L{i}", "R")] = 20
     rep = A.funnel_report(rows, pack_lookup=lambda c, r: scores.get((c, r)))
     assert any("70+ ATS band" in t and "<50" in t for t in rep["takeaways"])
+
+
+def test_band_takeaway_does_not_recommend_high_when_low_converts_better():
+    # 3 apps in 70+ band, none responded; 3 apps in <50 band, all responded.
+    rows = (
+        [_row("Co", f"hi{i}", "applied") for i in range(3)]
+        + [_row("Co", f"lo{i}", "response") for i in range(3)]
+    )
+    scores = {}
+    for i in range(3):
+        scores[("Co", f"hi{i}")] = 80
+        scores[("Co", f"lo{i}")] = 30
+    rep = A.funnel_report(rows, pack_lookup=lambda c, r: scores.get((c, r)))
+    joined = " ".join(rep["takeaways"]).lower()
+    assert "prioritise higher-scoring" not in joined and "prioritize higher-scoring" not in joined
+
+
+def test_band_takeaway_recommends_high_when_high_converts_better():
+    rows = (
+        [_row("Co", f"hi{i}", "response") for i in range(3)]
+        + [_row("Co", f"lo{i}", "applied") for i in range(3)]
+    )
+    scores = {}
+    for i in range(3):
+        scores[("Co", f"hi{i}")] = 80
+        scores[("Co", f"lo{i}")] = 30
+    rep = A.funnel_report(rows, pack_lookup=lambda c, r: scores.get((c, r)))
+    assert any("higher-scoring" in t.lower() for t in rep["takeaways"])
+
+
+def test_best_source_takeaway_suppressed_on_tie():
+    # two sources, equal response rate, >=3 each -> no "send more there".
+    rows = (
+        [_row("Co", f"a{i}", "response" if i == 0 else "applied", source="indeed")
+         for i in range(3)]
+        + [_row("Co", f"b{i}", "response" if i == 0 else "applied", source="linkedin")
+           for i in range(3)]
+    )
+    rep = A.funnel_report(rows)
+    assert "send more there" not in " ".join(rep["takeaways"]).lower()
