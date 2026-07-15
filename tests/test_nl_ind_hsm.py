@@ -85,3 +85,38 @@ def test_missing_register_annotates_not_found(monkeypatch, tmp_path):
     prov = wa.get_provider("nl-ind-hsm")   # no register seeded
     assert prov.load_sponsors() == []
     assert prov.annotate(["ASML"])["ASML"]["status"] == "not_found"
+
+
+def test_single_token_subset_does_not_false_confirm(monkeypatch, tmp_path):
+    """SAFETY regression: a bare brand name that shares only ONE token with an
+    unrelated multi-word sponsor must never reach 'confirmed' — that would show
+    a visa-dependent user a false sponsor guarantee."""
+    home = tmp_path / "ws"; home.mkdir()
+    monkeypatch.setenv("JOB_HUNT_HOME", str(home))
+    _seed_register(home, [
+        {"company_name": "Apple Tree Kinderopvang B.V.", "careers_url": "",
+         "category": "hsm", "last_verified": ""},
+        {"company_name": "Meta Solutions Staffing B.V.", "careers_url": "",
+         "category": "hsm", "last_verified": ""},
+    ])
+    prov = wa.get_provider("nl-ind-hsm")
+    ann = prov.annotate(["Apple", "Meta"])
+    assert ann["Apple"]["status"] != "confirmed"
+    assert ann["Apple"]["status"] in {"possible", "not_found"}
+    assert ann["Meta"]["status"] != "confirmed"
+    assert ann["Meta"]["status"] in {"possible", "not_found"}
+
+
+def test_two_token_subset_still_confirms(monkeypatch, tmp_path):
+    """The subset boost still works for legitimate multi-token subset matches
+    (>=2 shared tokens): the query's 2 tokens are a proper subset of the
+    sponsor's 3 tokens (so this isn't an exact-match shortcut)."""
+    home = tmp_path / "ws"; home.mkdir()
+    monkeypatch.setenv("JOB_HUNT_HOME", str(home))
+    _seed_register(home, [
+        {"company_name": "Booking Amsterdam Technology B.V.", "careers_url": "https://booking.com/careers",
+         "category": "hsm", "last_verified": ""},
+    ])
+    prov = wa.get_provider("nl-ind-hsm")
+    ann = prov.annotate(["Booking Amsterdam"])
+    assert ann["Booking Amsterdam"]["status"] == "confirmed"

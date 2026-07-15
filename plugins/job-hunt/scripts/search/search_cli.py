@@ -45,9 +45,9 @@ def _target_levels() -> list[str]:
         prof = profile_mod.load_profile()
     except (FileNotFoundError, ValueError):
         return []
-    lvls = (prof.get("language_constraints") or {})  # placeholder; profile has no
-    # explicit level field in Phase 1 — target_levels stay empty (neutral) unless a
-    # future profile adds them. Kept here so ranking wiring is one edit away.
+    # The profile has no explicit level field in Phase 1 — target_levels stay
+    # empty (neutral) unless a future profile adds them. Kept here so ranking
+    # wiring is one edit away.
     return list(prof.get("target_levels", [])) if isinstance(prof.get("target_levels"), list) else []
 
 
@@ -83,6 +83,8 @@ def cmd_filter_dedupe_rank(args: argparse.Namespace) -> int:
 
     after_gate = len(kept)
     new = dedupe.filter_new(kept)  # vs workspace tracker + output packs
+    before_collapse = len(new)
+    new = dedupe.collapse_by_slug(new)  # collapse same job found on 2 platforms
     ranked = rank_mod.rank_listings(new, target_levels=_target_levels())
 
     _emit({
@@ -92,7 +94,8 @@ def cmd_filter_dedupe_rank(args: argparse.Namespace) -> int:
             "total_in": total_in,
             "after_gate": after_gate,
             "dropped": dropped,
-            "duplicates": after_gate - len(new),
+            "duplicates": after_gate - before_collapse,
+            "intra_batch_collapsed": before_collapse - len(new),
             "new": len(new),
         },
         "new": ranked,

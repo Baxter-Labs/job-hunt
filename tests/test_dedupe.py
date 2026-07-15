@@ -51,3 +51,14 @@ def test_filter_new_removes_duplicates(tmp_path):
     ]
     kept = D.filter_new(listings, tracker_rows=rows, output_root=out)
     assert [l["company"] for l in kept] == ["New Co"]
+
+
+def test_collapse_by_slug_keeps_first_of_intra_batch_duplicates():
+    listings = [
+        {"company": "Acme", "role": "Backend Engineer", "job_id": "indeed-1"},
+        {"company": "Acme", "role": "Backend Engineer", "job_id": "linkedin-9"},  # same job, 2nd platform
+        {"company": "New Co", "role": "Data Scientist", "job_id": "indeed-2"},
+    ]
+    unique = D.collapse_by_slug(listings)
+    assert [l["job_id"] for l in unique] == ["indeed-1", "indeed-2"]
+    assert len(unique) == 2

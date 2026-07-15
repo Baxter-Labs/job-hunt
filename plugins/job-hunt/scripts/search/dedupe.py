@@ -55,6 +55,20 @@ def is_duplicate(
     }
 
 
+def collapse_by_slug(listings: list[dict]) -> list[dict]:
+    """Collapse intra-batch duplicates: keep the first listing per (company, role)
+    pack slug, so the same job found on two platforms is presented once."""
+    seen: set[str] = set()
+    unique: list[dict] = []
+    for l in listings:
+        slug = pack_slug(l.get("company", ""), l.get("role", ""))
+        if slug in seen:
+            continue
+        seen.add(slug)
+        unique.append(l)
+    return unique
+
+
 def filter_new(
     listings: list[dict[str, Any]],
     *,

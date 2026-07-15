@@ -118,7 +118,12 @@ def match_company(query: str, sponsors: list[dict]) -> dict:
         sponsor_coverage = len(intersection) / len(sponsor_tokens)
         score = (query_coverage + sponsor_coverage) / 2
 
-        if query_tokens <= sponsor_tokens:
+        # Divergence from the ported source (intentional, tested): only boost to a
+        # confirmable score when at least TWO tokens overlap. A single shared token
+        # (e.g. bare brand "Apple" is a subset of "Apple Tree Kinderopvang B.V.")
+        # must NOT reach "confirmed" — it stays "possible" (flagged for a human
+        # check), never a false sponsor guarantee for a visa-dependent user.
+        if query_tokens <= sponsor_tokens and len(intersection) >= 2:
             score = max(score, 0.85)
 
         has_url = bool(sponsor.get("careers_url"))

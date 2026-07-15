@@ -83,6 +83,27 @@ def test_filter_dedupe_rank_end_to_end(tmp_path):
     assert "rank_score" in ing
 
 
+def test_filter_dedupe_rank_collapses_intra_batch_duplicates(tmp_path):
+    home = tmp_path / "ws"
+    (home / "output").mkdir(parents=True)
+    (home / "config").mkdir(parents=True)
+    _profile(home, "none")
+    listings = [
+        {"source": "indeed", "company": "New Co", "role": "Data Scientist",
+         "url": "https://a", "job_id": "i1", "posted_date": "2026-07-14"},
+        {"source": "linkedin", "company": "New Co", "role": "Data Scientist",
+         "url": "https://b", "job_id": "l1", "posted_date": "2026-07-14"},  # same job, 2nd platform
+    ]
+    lf = tmp_path / "listings.json"
+    lf.write_text(json.dumps(listings), encoding="utf-8")
+    proc = _run(["filter-dedupe-rank", "--listings-file", str(lf), "--scheme", "none"], home)
+    assert proc.returncode == 0, proc.stderr
+    out = json.loads(proc.stdout)
+    assert out["ok"] is True
+    assert out["counts"]["new"] == 1
+    assert out["counts"]["intra_batch_collapsed"] == 1
+
+
 def test_filter_dedupe_rank_drop_unknown(tmp_path):
     home = tmp_path / "ws"
     (home / "output").mkdir(parents=True)
