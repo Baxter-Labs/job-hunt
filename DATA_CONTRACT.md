@@ -211,3 +211,49 @@ preserved (not stripped). This is the shape every platform's raw scrape
 must be normalised into before it enters the deterministic
 annotate/filter/dedupe/rank pipeline in `search/search_cli.py` — a new
 platform only needs to produce this shape.
+
+---
+
+## Insights CLI outputs (stdout, not persisted)
+
+`plugins/job-hunt/scripts/insights/insights_cli.py` prints one JSON object per
+subcommand and writes nothing to the workspace. These shapes are a stable
+contract for the funnel skills (`/job-redflag`, `/job-upskill`,
+`/job-followup`), documented here even though no file is created.
+
+`red-flags` (`insights/redflags.py`, `scan_red_flags`):
+
+| Field | Type | Notes |
+|---|---|---|
+| `ok` | boolean | `false` + `error` on failure |
+| `count` | integer | `len(red_flags)` |
+| `red_flags` | array of object | each `{flag, category, evidence, severity}` |
+
+Each red flag: `flag` (stable slug, e.g. `vague-compensation`), `category` (one
+of `compensation`, `culture`, `workload`, `benefits`, `hiring-process`,
+`seniority`), `evidence` (the exact matched JD substring), `severity` (`low` /
+`medium` / `high`). Advisory only — never a verdict.
+
+`upskill` (`insights/upskill.py`, `aggregate_gaps`):
+
+| Field | Type | Notes |
+|---|---|---|
+| `ok` | boolean | |
+| `packs_scanned` | integer | number of packs with a readable `ats_report.json` |
+| `gaps` | array of object | each `{keyword, count, roles}`, ranked by `count` desc then `keyword` asc |
+
+Gaps are drawn from each pack's `ats_report.json` `missing_keywords` — the same
+honest gaps `/job-tailor` reports, aggregated, never re-scored or inflated.
+
+`followup-context` (`insights/followup.py`, `application_context`):
+
+| Field | Type | Notes |
+|---|---|---|
+| `ok` | boolean | |
+| `company` / `role` | string | echoed from the request |
+| `status` / `date_applied` / `url` / `source` | string | from the matching `tracker.csv` row, `""` if none |
+| `has_pack` | boolean | whether the pack has an `ats_report.json` |
+| `ats_score` | integer \| null | the pack's `match_score`, or `null` |
+
+This assembles context for a follow-up email DRAFT only. The Python never sends
+anything.

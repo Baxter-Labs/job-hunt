@@ -26,12 +26,14 @@ tests.
 .venv/bin/python -m pytest -q
 ```
 
-181 tests as of this writing, covering the engine modules
+235 tests as of this writing, covering the engine modules
 (`profile`, `cv_import`, `workspace`), the search pipeline (`listing`,
 `dedupe`, `rank`, `tracker`, work-auth providers), the tailoring engine
 (`tailor_engine`, `ats`, PDF rendering), the apply/track CLIs, the dashboard,
-the quality-evals gate (`evals/`), and every command/skill's static assets
-(frontmatter, `${CLAUDE_PLUGIN_ROOT}` usage, absence of personal data).
+the quality-evals gate (`evals/`), the funnel insights package (`redflags`,
+`upskill`, `followup`, `insights_cli`), and every command/skill's static
+assets (frontmatter, `${CLAUDE_PLUGIN_ROOT}` usage, absence of personal
+data).
 
 The suite includes `tests/test_evals.py`, which drives the golden-case quality
 evals in `evals/` (deterministic, offline). Add or update a golden case whenever

@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   (`evals/run_evals.py`), and a `pytest` gate (`tests/test_evals.py`) with
   regression guards for the trailing-punctuation and score-honesty bugs. Dev
   tooling only — no user-facing command changes.
+- Added four funnel-stage features, each a `/command` + skill backed by a new
+  deterministic `scripts/insights/` package: `/job-redflag` (curated,
+  word-boundary-correct JD red-flag scanner), `/job-upskill` (ranked
+  missing-keyword gaps aggregated across tailored packs), `/job-interview-prep`
+  (interview questions + talking points grounded only in the master CV), and
+  `/job-followup` (a follow-up email *draft* assembled from the tracker + pack
+  that is never sent). All new Python is offline, workspace-read-only, and fully
+  unit-tested; the generative parts live in the skills.
 
 ## [0.1.0] - 2026-07-15
 

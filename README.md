@@ -70,6 +70,10 @@ failing silently. Once `pypdf` is installed, run:
 | `/job-tailor` | Takes a job description and produces a tailored CV + cover letter (PDF), an ATS match score with missing keywords, and a change log — grounded entirely in facts already in your master CV. |
 | `/job-apply` | Assisted apply: shows you the pack's ATS score first, opens the apply page, prefills only safe non-secret contact fields, attaches your pack, and stops at any CAPTCHA, login, or consent step. |
 | `/job-track` | Prints a text summary of your application tracker by default, or launches a local dashboard with `dashboard`. |
+| `/job-redflag` | Scans a job description for advisory red flags (vague pay, culture cliches, unpaid assessments, unrealistic seniority ranges) with the exact evidence line and a severity for each — advisory, never a verdict. |
+| `/job-upskill` | Aggregates the missing keywords across the roles you've tailored into ranked skill gaps (with frequency and which roles wanted each), then turns them into a focused learning plan. |
+| `/job-interview-prep` | Generates likely interview questions and talking points for a role, grounded only in real experience from your master CV, flagging thin areas honestly. |
+| `/job-followup` | Drafts a follow-up email for a role you've applied to, grounded in your tracker and pack — for you to review and send yourself. It never sends anything. |
 
 ### Example flow
 
