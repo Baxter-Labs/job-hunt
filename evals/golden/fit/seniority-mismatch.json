@@ -1,0 +1,17 @@
+{
+  "id": "seniority-mismatch", "synthetic": true,
+  "jd": "Principal Machine Learning Engineer. Python, PyTorch, deep learning and NLP at scale.",
+  "master": {
+    "summary": "Junior ML engineer training models in PyTorch.",
+    "skills": [{"name": "Python"}, {"name": "PyTorch"}, {"name": "NLP"}],
+    "experience": [{"company": "Acme BV", "title": "Junior ML Engineer",
+                    "dates": "Jan 2023 – Dec 2024",
+                    "bullets": ["Trained deep learning models in PyTorch and Python.",
+                                "Built NLP pipelines."]}]
+  },
+  "expect": {
+    "fit_score_min": 37, "fit_score_max": 47,
+    "components": {"seniority": {"min": 20, "max": 20}, "skills": {"min": 60, "max": 100}},
+    "must_include_reason": ["level"]
+  }
+}

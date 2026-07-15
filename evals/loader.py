@@ -15,9 +15,11 @@ from typing import Any
 GOLDEN_DIR = Path(__file__).resolve().parent / "golden"
 ATS_DIR = GOLDEN_DIR / "ats"
 RANK_DIR = GOLDEN_DIR / "rank"
+FIT_DIR = GOLDEN_DIR / "fit"
 
 ATS_EXPECT_KEYS = frozenset({"score_min", "score_max", "must_match", "must_miss"})
 RANK_EXPECT_KEYS = frozenset({"order"})
+FIT_EXPECT_KEYS = frozenset({"fit_score_min", "fit_score_max"})
 
 
 class CaseError(Exception):
@@ -89,6 +91,35 @@ def validate_rank_case(case: dict[str, Any], source: str) -> None:
         _require(isinstance(case["today"], str), source, "'today' must be an ISO date string")
 
 
+def validate_fit_case(case: dict[str, Any], source: str) -> None:
+    _validate_common(case, source)
+    _require(isinstance(case.get("jd"), str) and case["jd"].strip() != "",
+             source, "missing non-empty string 'jd'")
+    _require(isinstance(case.get("master"), dict),
+             source, "missing 'master' object (a synthetic cv_master fragment)")
+    expect = case.get("expect")
+    _require(isinstance(expect, dict), source, "missing 'expect' object")
+    missing = FIT_EXPECT_KEYS - set(expect)
+    _require(not missing, source, f"expect missing key(s): {sorted(missing)}")
+    for k in ("fit_score_min", "fit_score_max"):
+        _require(isinstance(expect[k], int), source, f"expect.{k} must be an int")
+    _require(expect["fit_score_min"] <= expect["fit_score_max"],
+             source, "expect.fit_score_min must be <= expect.fit_score_max")
+    comps = expect.get("components", {})
+    _require(isinstance(comps, dict), source, "expect.components must be an object")
+    for name, bounds in comps.items():
+        _require(name in ("skills", "experience", "seniority"),
+                 source, f"expect.components has unknown key {name!r}")
+        _require(isinstance(bounds, dict)
+                 and isinstance(bounds.get("min"), int)
+                 and isinstance(bounds.get("max"), int)
+                 and bounds["min"] <= bounds["max"],
+                 source, f"expect.components.{name} must be {{min:int,max:int}} with min<=max")
+    reasons = expect.get("must_include_reason", [])
+    _require(isinstance(reasons, list) and all(isinstance(x, str) for x in reasons),
+             source, "expect.must_include_reason must be a list of strings")
+
+
 def iter_ats_files() -> list[Path]:
     return sorted(ATS_DIR.glob("*.json"))
 
@@ -112,6 +143,20 @@ def load_rank_cases() -> list[dict[str, Any]]:
     for path in iter_rank_files():
         case = load_json(path)
         validate_rank_case(case, path.name)
+        case["_source"] = path.name
+        cases.append(case)
+    return cases
+
+
+def iter_fit_files() -> list[Path]:
+    return sorted(FIT_DIR.glob("*.json"))
+
+
+def load_fit_cases() -> list[dict[str, Any]]:
+    cases: list[dict[str, Any]] = []
+    for path in iter_fit_files():
+        case = load_json(path)
+        validate_fit_case(case, path.name)
         case["_source"] = path.name
         cases.append(case)
     return cases

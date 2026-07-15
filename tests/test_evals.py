@@ -17,6 +17,7 @@ def _write(path: Path, obj) -> Path:
 def test_golden_dirs_exist():
     assert loader.ATS_DIR.is_dir()
     assert loader.RANK_DIR.is_dir()
+    assert loader.FIT_DIR.is_dir()
 
 
 def test_validate_ats_case_accepts_well_formed(tmp_path):
@@ -77,6 +78,16 @@ def test_validate_rank_case_rejects_missing_order():
         assert False, "expected CaseError"
     except loader.CaseError as e:
         assert "order" in str(e)
+
+
+def test_validate_fit_case_rejects_missing_master():
+    bad = {"id": "f", "synthetic": True, "jd": "x",
+           "expect": {"fit_score_min": 0, "fit_score_max": 100}}
+    try:
+        loader.validate_fit_case(bad, "f.json")
+        assert False, "expected CaseError"
+    except loader.CaseError as e:
+        assert "master" in str(e)
 
 
 def test_load_ats_cases_reads_and_validates(tmp_path, monkeypatch):
@@ -187,6 +198,7 @@ def test_evaluate_rank_case_flags_wrong_order():
     assert res["failures"]
 
 
+import fit_eval  # noqa: E402
 import re  # noqa: E402  (json already imported at top)
 import run_evals  # noqa: E402
 
@@ -206,8 +218,14 @@ def test_all_rank_golden_cases_pass():
         assert res["passed"], f"{res['source']}: {res['failures']}"
 
 
+def test_all_fit_golden_cases_pass():
+    for case in loader.load_fit_cases():
+        res = fit_eval.evaluate_fit_case(case)
+        assert res["passed"], f"{res['source']}: {res['failures']}"
+
+
 def test_golden_cases_are_synthetic_and_have_no_personal_data():
-    files = loader.iter_ats_files() + loader.iter_rank_files()
+    files = loader.iter_ats_files() + loader.iter_rank_files() + loader.iter_fit_files()
     assert files, "expected golden cases to exist"
     for path in files:
         raw = path.read_text(encoding="utf-8")
@@ -227,7 +245,8 @@ def test_scorecard_reports_every_case():
     results = run_evals.collect_results()
     text = run_evals.format_scorecard(results)
     assert "PASS" in text
-    # 8 ATS + 3 rank = 11 cases accounted for.
-    assert len(results) == 11
+    # 8 ATS + 3 rank + N fit cases accounted for.
+    expected_total = 8 + 3 + len(loader.iter_fit_files())
+    assert len(results) == expected_total
     for res in results:
         assert res["id"] in text

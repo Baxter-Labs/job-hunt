@@ -1,0 +1,18 @@
+{
+  "id": "strong-backend", "synthetic": true,
+  "jd": "Senior Backend Engineer. Python, SQL, Docker, Kubernetes, REST APIs and AWS. Design and run microservices in production.",
+  "master": {
+    "summary": "Senior backend engineer building Python microservices on AWS.",
+    "skills": [{"name": "Python"}, {"name": "SQL"}, {"name": "Docker"},
+               {"name": "Kubernetes"}, {"name": "AWS"}, {"name": "REST"}],
+    "experience": [{"company": "Northwind BV", "title": "Senior Backend Engineer",
+                    "dates": "Jan 2019 – Dec 2024",
+                    "bullets": ["Built Python microservices with Docker and Kubernetes.",
+                                "Designed REST APIs deployed on AWS."]}]
+  },
+  "expect": {
+    "fit_score_min": 67, "fit_score_max": 77,
+    "components": {"skills": {"min": 70, "max": 100}, "seniority": {"min": 100, "max": 100}},
+    "must_include_reason": ["Skills match:", "aligned"]
+  }
+}

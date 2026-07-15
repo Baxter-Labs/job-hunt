@@ -1,0 +1,16 @@
+{
+  "id": "domain-mismatch", "synthetic": true,
+  "jd": "Growth Marketing Manager. SEO, SEM, content marketing, email marketing and Google Analytics.",
+  "master": {
+    "summary": "Backend engineer building Python services.",
+    "skills": [{"name": "Python"}, {"name": "SQL"}, {"name": "Docker"}],
+    "experience": [{"company": "Northwind BV", "title": "Backend Engineer",
+                    "dates": "Jan 2020 – Dec 2024",
+                    "bullets": ["Built Python services with Docker."]}]
+  },
+  "expect": {
+    "fit_score_min": 9, "fit_score_max": 19,
+    "components": {"skills": {"min": 0, "max": 25}},
+    "must_include_reason": ["Skills match:"]
+  }
+}

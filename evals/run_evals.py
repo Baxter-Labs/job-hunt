@@ -21,6 +21,7 @@ if str(_HERE) not in sys.path:
 import loader  # noqa: E402
 import ats_eval  # noqa: E402
 import rank_eval  # noqa: E402
+import fit_eval  # noqa: E402
 
 
 def collect_results() -> list[dict]:
@@ -29,6 +30,8 @@ def collect_results() -> list[dict]:
         results.append(ats_eval.evaluate_ats_case(case))
     for case in loader.load_rank_cases():
         results.append(rank_eval.evaluate_rank_case(case))
+    for case in loader.load_fit_cases():
+        results.append(fit_eval.evaluate_fit_case(case))
     return results
 
 
@@ -40,6 +43,8 @@ def format_scorecard(results: list[dict]) -> str:
         status = "PASS" if res["passed"] else "FAIL"
         if res["kind"] == "ats":
             detail = f"score={res['score']}"
+        elif res["kind"] == "fit":
+            detail = f"fit={res['score']}"
         else:
             detail = f"order={res['order']}"
         lines.append(f"[{status}] {res['kind']:4} {res['id']:28} {detail}")
