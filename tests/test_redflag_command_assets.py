@@ -1,0 +1,47 @@
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[1]
+PLUGIN = REPO / "plugins" / "job-hunt"
+
+
+def _frontmatter(path):
+    text = path.read_text(encoding="utf-8")
+    assert text.startswith("---"), f"{path} missing frontmatter"
+    end = text.index("---", 3)
+    fields = {}
+    for line in text[3:end].strip().splitlines():
+        if ":" in line:
+            k, v = line.split(":", 1)
+            fields[k.strip()] = v.strip()
+    return fields
+
+
+def test_command_frontmatter():
+    assert "description" in _frontmatter(PLUGIN / "commands" / "job-redflag.md")
+
+
+def test_skill_frontmatter():
+    fields = _frontmatter(PLUGIN / "skills" / "job-redflag" / "SKILL.md")
+    assert fields.get("name") == "job-redflag"
+    assert "description" in fields
+
+
+def test_skill_uses_plugin_root_not_absolute_paths():
+    text = (PLUGIN / "skills" / "job-redflag" / "SKILL.md").read_text(encoding="utf-8")
+    assert "${CLAUDE_PLUGIN_ROOT}" in text
+    assert "/Users/dantepk" not in text
+
+
+def test_no_personal_data():
+    blob = ((PLUGIN / "commands" / "job-redflag.md").read_text(encoding="utf-8")
+            + (PLUGIN / "skills" / "job-redflag" / "SKILL.md").read_text(encoding="utf-8"))
+    assert "Eshwar" not in blob and "dantepk" not in blob
+
+
+def test_skill_invokes_insights_cli_red_flags():
+    text = (PLUGIN / "skills" / "job-redflag" / "SKILL.md").read_text(encoding="utf-8")
+    assert "insights.insights_cli" in text
+    assert "red-flags" in text
+    # Advisory, not a verdict; read-only.
+    low = text.lower()
+    assert "advisory" in low or "not a verdict" in low
