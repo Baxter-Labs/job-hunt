@@ -6,11 +6,11 @@ loop for every irreversible step. It is region-agnostic: you choose which
 job platforms to search and which work-authorisation scheme (if any) applies
 to you as plain settings, not hardcoded logic.
 
-It ships as a **Claude Code plugin** — eleven slash commands that share one
+It ships as a **Claude Code plugin** — twelve slash commands that share one
 workspace and one deterministic Python engine: `/job-setup` → `/job-search`
 → `/job-tailor` → `/job-apply` → `/job-track` (plus `/job-redflag`,
 `/job-upskill`, `/job-interview-prep`, `/job-followup`, `/job-fit`,
-`/job-readiness`). Under the hood it's
+`/job-readiness`, `/job-analytics`). Under the hood it's
 just Python CLIs and markdown skill instructions, so it also runs in Codex
 CLI, Cursor, opencode, and other AI coding agents — see
 [Use it in other AI agents](#use-it-in-other-ai-agents-codex-cursor-) below.
@@ -81,6 +81,7 @@ failing silently. Once `pypdf` is installed, run:
 | `/job-followup` | Drafts a follow-up email for a role you've applied to, grounded in your tracker and pack — for you to review and send yourself. It never sends anything. |
 | `/job-fit` | Scores how well your master CV fits a job description — a deterministic 0–100 fit score with a skills / experience / seniority breakdown and honest reasons. A low fit points you to better roles or `/job-upskill`, never to padding your CV. |
 | `/job-readiness` | Checks whether a tailored pack is ready to send before `/job-apply` — a deterministic 0–100 readiness score with an ATS / fit / completeness / red-flag checklist, a hard fabrication gate, and honest suggestions that surface skills you already have and route genuine gaps to `/job-upskill` (never padding your CV). |
+| `/job-analytics` | Shows your application-outcome funnel — how applications convert to responses, interviews, and offers — sliced by platform, work-auth flag, and ATS band (<50 / 50–69 / 70+), with honest, small-sample-aware takeaways about what is converting. Record outcomes with `/job-analytics log <company> / <role> / <status>`. |
 
 ### Example flow
 

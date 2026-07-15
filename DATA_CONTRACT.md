@@ -190,7 +190,7 @@ order, `FIELDNAMES`:
 | `company` | |
 | `role` | |
 | `url` | |
-| `status` | free-form string; e.g. `discovered`, `applied` are the two statuses the code treats specially |
+| `status` | Outcome status. Documented ordered vocabulary (`search/tracker.py` `STATUSES`): `not_applied`, `pack_generated`, `applied`, `response`, `interview`, `offer`, `rejected`, `ghosted`. Legacy `discovered` still round-trips. `applied` and beyond (including terminal negatives `rejected`/`ghosted`) count as "applied" in the analytics funnel; `response`/`interview`/`offer` are positive progressions. |
 | `work_auth_status` | one of the `WorkAuthProvider` `STATUSES` values, or `""` |
 | `job_id` | platform job id, used for dedupe when present |
 | `source` | platform key |
@@ -200,6 +200,14 @@ order, `FIELDNAMES`:
 by matching `job_id`; on a match, only non-empty incoming fields overwrite
 existing ones. `summarize()` returns `{total, by_status, by_work_auth}`
 counts across all rows.
+
+`log_outcome()` validates an incoming status against `STATUSES` (raising on an
+unknown value) then delegates to `upsert()`. `upsert()` stamps `date_applied` the
+first time a row reaches any applied-or-beyond status. `insights/analytics.py`'s
+`funnel_report(rows, pack_lookup=None)` reads these rows (joining each role's
+`ats_report.json` `match_score` via `pack_lookup` for its ATS band) and returns
+`{overall, by_source, by_work_auth, by_ats_band, takeaways, min_takeaway_n}`;
+it is computed on the fly and persists no new file.
 
 ---
 

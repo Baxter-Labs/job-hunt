@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added `/job-analytics` (Phase B of the "Land It" suite): deterministic, offline
+  outcome analytics in a new `scripts/insights/analytics.py`. Extends the tracker
+  status vocabulary to a documented ordered set (`not_applied, pack_generated,
+  applied, response, interview, offer, rejected, ghosted`) with a new
+  `search_cli log-outcome` path and a validating `tracker.log_outcome`, keeping the
+  legacy `discovered`/`applied` statuses valid. `funnel_report` computes the
+  applied → response → interview → offer funnel with rates (divide-by-zero → 0),
+  sliced by source, work-auth flag, and ATS band (<50 / 50–69 / 70+, joined from
+  each pack's `ats_report.json`), plus plain-language takeaways that only fire when
+  each compared group has at least `min_takeaway_n` (3) applications — no
+  over-claiming on tiny samples. Surfaced via `insights_cli analytics` and the
+  `job-analytics` skill; `/job-track` points to it. Unit-tested (no golden eval —
+  analytics is fixture-tested, not score-shaped).
 - Added `/job-fit` (Phase C of the "Land It" suite): a deterministic, offline
   0–100 fit score between your master CV and a job description, in a new
   `scripts/scoring/` package (`fit.py` + `scoring_cli.py`). Blends skills
