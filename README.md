@@ -78,6 +78,7 @@ failing silently. Once `pypdf` is installed, run:
 | `/job-upskill` | Aggregates the missing keywords across the roles you've tailored into ranked skill gaps (with frequency and which roles wanted each), then turns them into a focused learning plan. |
 | `/job-interview-prep` | Generates likely interview questions and talking points for a role, grounded only in real experience from your master CV, flagging thin areas honestly. |
 | `/job-followup` | Drafts a follow-up email for a role you've applied to, grounded in your tracker and pack — for you to review and send yourself. It never sends anything. |
+| `/job-fit` | Scores how well your master CV fits a job description — a deterministic 0–100 fit score with a skills / experience / seniority breakdown and honest reasons. A low fit points you to better roles or `/job-upskill`, never to padding your CV. |
 
 ### Example flow
 

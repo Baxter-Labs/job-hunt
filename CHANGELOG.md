@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added `/job-fit` (Phase C of the "Land It" suite): a deterministic, offline
+  0–100 fit score between your master CV and a job description, in a new
+  `scripts/scoring/` package (`fit.py` + `scoring_cli.py`). Blends skills
+  coverage (0.5, reusing the ATS keyword engine), experience/title relevance
+  (0.3), and seniority alignment (0.2) with documented weights; reports honest
+  reasons and routes low fits to `/job-upskill` rather than padding the CV.
+  Golden-eval'd under `evals/golden/fit/` and gated in `tests/test_evals.py`.
 - Added cross-platform usage docs so the plugin can be used from any AI
   coding agent, not just Claude Code: `AGENTS.md` (setup, workspace model,
   command catalog for Codex CLI / opencode / any shell-capable agent),
