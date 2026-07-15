@@ -25,7 +25,8 @@ if str(_SCRIPTS) not in sys.path:
 
 from tailor.tailor_engine import load_job_description  # noqa: E402
 from apply import preapply  # noqa: E402
-from insights import redflags, upskill, followup  # noqa: E402
+from insights import redflags, upskill, followup, analytics  # noqa: E402
+from search import tracker as tracker_mod  # noqa: E402
 
 
 def _emit(obj: dict) -> None:
@@ -65,6 +66,16 @@ def cmd_followup_context(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_analytics(args: argparse.Namespace) -> int:
+    output_root = Path(args.output_root) if args.output_root else None
+    rows = tracker_mod.load_tracker()
+    lookup = analytics.workspace_pack_lookup(output_root=output_root)
+    report = analytics.funnel_report(rows, pack_lookup=lookup)
+    report["ok"] = True
+    _emit(report)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="insights_cli")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -97,6 +108,10 @@ def build_parser() -> argparse.ArgumentParser:
     fu.add_argument("--role", required=False, default=None)
     fu.add_argument("--output-root", default=None, help="Override the output root (tests).")
     fu.set_defaults(func=cmd_followup_context)
+
+    an = sub.add_parser("analytics", help="Outcome funnel + breakdowns + takeaways.")
+    an.add_argument("--output-root", default=None, help="Override the output root (tests).")
+    an.set_defaults(func=cmd_analytics)
 
     return parser
 

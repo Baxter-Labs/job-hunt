@@ -138,3 +138,42 @@ def test_followup_context_missing_args_returns_json_exit1(tmp_path):
     assert proc.returncode == 1
     out = json.loads(proc.stdout)
     assert out["ok"] is False and "error" in out
+
+
+# --- analytics ---
+
+def _log_outcome(home, company, role, status, source="indeed"):
+    return subprocess.run(
+        [str(VENV_PY), "-m", "search.search_cli", "log-outcome",
+         "--company", company, "--role", role, "--status", status, "--source", source],
+        cwd=str(SCRIPTS), capture_output=True, text=True,
+        env={"JOB_HUNT_HOME": str(home), "PATH": "/usr/bin:/bin"},
+    )
+
+
+def test_analytics_empty_workspace(tmp_path):
+    home = tmp_path / "ws"; home.mkdir()
+    proc = _run(["analytics"], home)
+    assert proc.returncode == 0, proc.stderr
+    out = json.loads(proc.stdout)
+    assert out["ok"] is True
+    assert out["overall"]["total"] == 0
+    assert out["takeaways"] == []
+
+
+def test_analytics_funnel_with_packs_and_bands(tmp_path):
+    home = tmp_path / "ws"; (home / "output").mkdir(parents=True)
+    # Two roles with packs (ATS bands) + logged outcomes.
+    _seed_pack(home, "hi-co-ai-engineer", "Hi Co", "AI Engineer", missing=[], score=85)
+    _seed_pack(home, "lo-co-ai-engineer", "Lo Co", "AI Engineer", missing=["x"], score=40)
+    _log_outcome(home, "Hi Co", "AI Engineer", "interview")
+    _log_outcome(home, "Lo Co", "AI Engineer", "applied")
+    proc = _run(["analytics"], home)
+    assert proc.returncode == 0, proc.stderr
+    out = json.loads(proc.stdout)
+    assert out["overall"]["applied"] == 2
+    assert out["overall"]["responses"] == 1        # the interview
+    assert out["by_ats_band"]["70+"]["applied"] == 1
+    assert out["by_ats_band"]["70+"]["interviews"] == 1
+    assert out["by_ats_band"]["<50"]["applied"] == 1
+    assert out["by_source"]["indeed"]["applied"] == 2
