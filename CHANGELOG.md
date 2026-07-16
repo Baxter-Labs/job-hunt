@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added `/job-pipeline` (Phase D of the "Land It" suite, completing the
+  suite): a skill-orchestrated auto-pipeline that chains the profile's
+  platform search → per-role fit-scoring → deterministic top-N selection →
+  auto-tailoring (the `/job-tailor` flow) → readiness-scoring into one ranked,
+  review-ready shortlist (company/role · fit · ATS · readiness · top gaps ·
+  pack path). The only new Python is `scripts/scoring/select.py`
+  (`select_top_n`/`scored_shortlist`, a pure, offline, deterministic
+  top-N-by-fit sort with a company/role tie-break) plus a thin `select`
+  subcommand on `scoring_cli`; everything else is existing CLIs driven by the
+  skill. A role that fails the fabrication gate is surfaced as blocked, never
+  hidden or worked around; unavailable platform tools are skipped with an
+  explicit note. User approves every apply — no new auto-submit path; every
+  send still goes through assisted `/job-apply`. Unit-tested
+  (`test_select.py`, `test_scoring_cli_select.py`) and asset-tested
+  (`test_pipeline_command_assets.py`); no new golden evals, since selection is
+  a pure sort already fully covered by unit tests.
 - Added `/job-analytics` (Phase B of the "Land It" suite): deterministic, offline
   outcome analytics in a new `scripts/insights/analytics.py`. Extends the tracker
   status vocabulary to a documented ordered set (`not_applied, pack_generated,

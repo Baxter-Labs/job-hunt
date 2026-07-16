@@ -6,11 +6,11 @@ loop for every irreversible step. It is region-agnostic: you choose which
 job platforms to search and which work-authorisation scheme (if any) applies
 to you as plain settings, not hardcoded logic.
 
-It ships as a **Claude Code plugin** — twelve slash commands that share one
+It ships as a **Claude Code plugin** — thirteen slash commands that share one
 workspace and one deterministic Python engine: `/job-setup` → `/job-search`
 → `/job-tailor` → `/job-apply` → `/job-track` (plus `/job-redflag`,
 `/job-upskill`, `/job-interview-prep`, `/job-followup`, `/job-fit`,
-`/job-readiness`, `/job-analytics`). Under the hood it's
+`/job-readiness`, `/job-analytics`, `/job-pipeline`). Under the hood it's
 just Python CLIs and markdown skill instructions, so it also runs in Codex
 CLI, Cursor, opencode, and other AI coding agents — see
 [Use it in other AI agents](#use-it-in-other-ai-agents-codex-cursor-) below.
@@ -82,6 +82,7 @@ failing silently. Once `pypdf` is installed, run:
 | `/job-fit` | Scores how well your master CV fits a job description — a deterministic 0–100 fit score with a skills / experience / seniority breakdown and honest reasons. A low fit points you to better roles or `/job-upskill`, never to padding your CV. |
 | `/job-readiness` | Checks whether a tailored pack is ready to send before `/job-apply` — a deterministic 0–100 readiness score with an ATS / fit / completeness / red-flag checklist, a hard fabrication gate, and honest suggestions that surface skills you already have and route genuine gaps to `/job-upskill` (never padding your CV). |
 | `/job-analytics` | Shows your application-outcome funnel — how applications convert to responses, interviews, and offers — sliced by platform, work-auth flag, and ATS band (<50 / 50–69 / 70+), with honest, small-sample-aware takeaways about what is converting. Record outcomes with `/job-analytics log <company> / <role> / <status>`. |
+| `/job-pipeline` | Runs your whole shortlisting loop in one pass — searches your platforms, fit-scores the new roles, auto-tailors the top few, readiness-scores each, and hands you a ranked shortlist (fit · ATS · readiness · gaps · pack path). You pick which to apply to; every apply still goes through `/job-apply` and nothing is auto-submitted. |
 
 ### Example flow
 
@@ -106,6 +107,30 @@ failing silently. Once `pypdf` is installed, run:
   → "3 tracked, 1 applied, 2 discovered" — or /job-track dashboard for a
     local browser view with download links
 ```
+
+## Landing jobs, not just applying
+
+Four commands work together as an honesty layer on top of the core
+search → tailor → apply loop, all deterministic and all user-approves-every-send:
+
+- **`/job-fit`** — before you spend time tailoring, should you invest in this
+  role? A 0–100 fit score against your master CV, with a skills / experience
+  / seniority breakdown.
+- **`/job-readiness`** — before you hit apply, is this pack actually strong,
+  and how do you honestly strengthen it? A 0–100 readiness score with a hard
+  fabrication gate — it never suggests padding your CV, only re-tailoring
+  with facts you already have or routing genuine gaps to `/job-upskill`.
+- **`/job-analytics`** — after you've applied, what's actually converting?
+  Your real response/interview/offer funnel, sliced by platform, work-auth
+  flag, and ATS band, with small-sample-aware takeaways.
+- **`/job-pipeline`** — turns a whole session into a ranked, review-ready
+  shortlist in one pass: search → fit-score → top-N select → auto-tailor →
+  readiness-score, so you spend your attention deciding, not clicking through
+  each step by hand.
+
+None of the four fabricates a score or a claim, and none of them auto-submits
+an application — you still pick what to apply to, and every send goes
+through assisted `/job-apply`.
 
 ## How it works
 

@@ -115,3 +115,12 @@ Python runs.
   tool isn't available in a given session, the skill instructions say to
   skip that platform/feature and report it explicitly — never fabricate a
   listing or an apply action.
+- **`job-pipeline` — MCP-dependent for discovery and apply, offline in
+  between:** it chains `/job-search`'s discovery step (same job-board
+  search / browser-automation tools as above) into fit-scoring, top-N
+  selection, auto-tailoring, and readiness-scoring, which are all offline
+  and deterministic; it hands off to assisted `/job-apply` (same browser
+  automation) for every send. If a profile platform's search tool is
+  unavailable in the session, `job-pipeline` skips that platform with an
+  explicit note rather than faking results — it never fabricates a listing,
+  a JD, or an apply action, and the user still approves every send.

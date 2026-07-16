@@ -76,6 +76,7 @@ files are the source of truth**, not this table.
 | Readiness score (pack pre-apply) | `python -m scoring.scoring_cli readiness --pack "<slug>"` (JD from the pack, or `--jd-text`/`--jd-file`) | `plugins/job-hunt/skills/job-readiness/SKILL.md` |
 | Outcome funnel analytics | `python -m insights.insights_cli analytics` | `plugins/job-hunt/skills/job-analytics/SKILL.md` |
 | Log an application outcome | `python -m search.search_cli log-outcome --company "<C>" --role "<R>" --status "<S>"` | `plugins/job-hunt/skills/job-analytics/SKILL.md` |
+| Auto-pipeline (search → fit → select → tailor → readiness → shortlist) | `python -m search.search_cli filter-dedupe-rank`, `python -m scoring.scoring_cli fit`/`select`/`readiness`, `python -m tailor.tailor_cli finalize` (skill-orchestrated, no single entry point) | `plugins/job-hunt/skills/job-pipeline/SKILL.md` |
 
 **How to use this table:** for any capability, open the matching
 `plugins/job-hunt/skills/<name>/SKILL.md` and follow it step by step. It
@@ -105,7 +106,11 @@ you must configure the equivalent MCP servers (or an in-agent browser tool)
 yourself — see [docs/PLATFORMS.md](docs/PLATFORMS.md). If the required tool
 isn't available in the current session, **skip that feature and say so
 explicitly** — never fabricate a listing, an apply action, or a submission
-confirmation.
+confirmation. `job-pipeline` chains `job-search`'s discovery step into the
+otherwise-offline fit/select/tailor/readiness steps, so it inherits the same
+MCP dependency for discovery; it skips any platform whose tool is unavailable
+and says so, and every apply it hands off still goes through assisted
+`job-apply`.
 
 ## Safety rules (binding, not optional)
 
