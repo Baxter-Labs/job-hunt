@@ -4,6 +4,7 @@ Subcommands (deterministic, offline, workspace-read-only):
   * fit         --jd-file | --jd-text   -> {"ok": true, "fit_score", "components", "reasons"}
   * readiness   --pack [--jd-file | --jd-text] [--no-write]
                 -> {"ok": true, "readiness_score", "factors", "suggestions", "blocking", ...}
+  * select      --scored-file --n       -> {"ok": true, "total", "n", "selected"}
 
 The fit score is a diagnostic only. A low fit routes the user to focus elsewhere
 or /job-upskill; it is never a reason to fabricate. This CLI loads the workspace
@@ -28,6 +29,7 @@ from scoring import fit  # noqa: E402
 from engine import workspace  # noqa: E402
 from apply import preapply  # noqa: E402
 from scoring import readiness  # noqa: E402
+from scoring import select as select_mod  # noqa: E402
 
 
 def _emit(obj: dict) -> None:
@@ -72,6 +74,16 @@ def cmd_readiness(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_select(args: argparse.Namespace) -> int:
+    raw = json.loads(Path(args.scored_file).read_text(encoding="utf-8"))
+    if not isinstance(raw, list):
+        _emit({"ok": False, "error": "scored file must be a JSON array"})
+        return 1
+    selected = select_mod.select_top_n(raw, args.n)
+    _emit({"ok": True, "total": len(raw), "n": len(selected), "selected": selected})
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="scoring_cli")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -95,6 +107,12 @@ def build_parser() -> argparse.ArgumentParser:
     rd.add_argument("--output-root", default=None, help="Override the output root (tests).")
     rd.add_argument("--no-write", action="store_true", help="Do not write readiness.json.")
     rd.set_defaults(func=cmd_readiness)
+
+    sel = sub.add_parser("select", help="Pick the top-N fit-scored roles for the pipeline.")
+    sel.add_argument("--scored-file", required=True,
+                     help="JSON array of roles, each with a fit_score.")
+    sel.add_argument("--n", type=int, default=5, help="How many to select (default 5).")
+    sel.set_defaults(func=cmd_select)
 
     return parser
 
