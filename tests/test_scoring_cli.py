@@ -75,3 +75,11 @@ def test_fit_emits_single_json_object(tmp_path):
     home = _home(tmp_path)
     proc = _run(["fit", "--jd-text", "Python and SQL."], home)
     assert proc.stdout.strip().count("\n") == 0  # exactly one line / one object
+
+
+def test_select_requires_scored_file_json_exit1(tmp_path):
+    home = _home(tmp_path)
+    proc = _run(["select"], home)                # no --scored-file
+    assert proc.returncode == 1
+    out = json.loads(proc.stdout)                # JSON, NOT argparse exit 2 / usage text
+    assert out["ok"] is False and "error" in out

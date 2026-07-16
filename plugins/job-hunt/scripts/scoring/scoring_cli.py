@@ -75,6 +75,8 @@ def cmd_readiness(args: argparse.Namespace) -> int:
 
 
 def cmd_select(args: argparse.Namespace) -> int:
+    if not args.scored_file:
+        raise ValueError("--scored-file is required")
     raw = json.loads(Path(args.scored_file).read_text(encoding="utf-8"))
     if not isinstance(raw, list):
         _emit({"ok": False, "error": "scored file must be a JSON array"})
@@ -109,7 +111,10 @@ def build_parser() -> argparse.ArgumentParser:
     rd.set_defaults(func=cmd_readiness)
 
     sel = sub.add_parser("select", help="Pick the top-N fit-scored roles for the pipeline.")
-    sel.add_argument("--scored-file", required=True,
+    # --scored-file is NOT argparse-required: an omitted value must fall through to
+    # cmd_select's ValueError -> {"ok": false} + exit 1, never argparse exit 2 —
+    # matching the fit/readiness subcommands' contract.
+    sel.add_argument("--scored-file", default=None,
                      help="JSON array of roles, each with a fit_score.")
     sel.add_argument("--n", type=int, default=5, help="How many to select (default 5).")
     sel.set_defaults(func=cmd_select)
